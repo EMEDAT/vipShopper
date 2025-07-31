@@ -12,12 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // API Middleware Stack with Sanctum
-        $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-        ]);
-        
-        // Enable API throttling
+        // Pure API setup for Flutter - NO stateful middleware
         $middleware->throttleApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
