@@ -12,8 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Pure API setup for Flutter - NO stateful middleware
-        $middleware->throttleApi();
+        // Minimal middleware - no throttling, no stateful Sanctum
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
