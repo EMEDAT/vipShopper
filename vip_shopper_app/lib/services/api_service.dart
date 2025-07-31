@@ -5,7 +5,8 @@ import '../models/user.dart';
 import '../models/product.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://127.0.0.1:8000/api';
+  // CHANGED: Use localhost instead of 127.0.0.1 to match Flutter web domain
+  static const String baseUrl = 'http://localhost:8000/api';
   
   // Get stored auth token
   static Future<String?> getToken() async {
@@ -42,6 +43,7 @@ class ApiService {
     required String password,
   }) async {
     try {
+      print('Attempting registration to: $baseUrl/register');
       final response = await http.post(
         Uri.parse('$baseUrl/register'),
         headers: await getHeaders(),
@@ -52,15 +54,19 @@ class ApiService {
         }),
       );
 
+      print('Registration response status: ${response.statusCode}');
+      print('Registration response body: ${response.body}');
+
       final data = jsonDecode(response.body);
       
-      if (response.statusCode == 201) {
+      if (response.statusCode == 201 || response.statusCode == 200) {
         await storeToken(data['token']);
         return {'success': true, 'user': User.fromJson(data)};
       } else {
         return {'success': false, 'message': data['message'] ?? 'Registration failed'};
       }
     } catch (e) {
+      print('Registration error: $e');
       return {'success': false, 'message': 'Network error: $e'};
     }
   }
@@ -71,6 +77,7 @@ class ApiService {
     required String password,
   }) async {
     try {
+      print('Attempting login to: $baseUrl/login');
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: await getHeaders(),
@@ -79,6 +86,9 @@ class ApiService {
           'password': password,
         }),
       );
+
+      print('Login response status: ${response.statusCode}');
+      print('Login response body: ${response.body}');
 
       final data = jsonDecode(response.body);
       
@@ -89,6 +99,7 @@ class ApiService {
         return {'success': false, 'message': data['message'] ?? 'Login failed'};
       }
     } catch (e) {
+      print('Login error: $e');
       return {'success': false, 'message': 'Network error: $e'};
     }
   }
@@ -185,39 +196,15 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final products = data['recommendations'] as List;
+        final products = data['products'] as List;
         return {
           'success': true,
           'products': products.map((json) => Product.fromJson(json)).toList(),
-          'reasoning': data['ai_reasoning'],
-          'message': data['message'],
+          'insights': data['ai_insights'],
+          'recommendations': data['recommendations'],
         };
       } else {
         return {'success': false, 'message': 'Failed to get recommendations'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Network error: $e'};
-    }
-  }
-
-  // AI Chat (requires auth)
-  static Future<Map<String, dynamic>> aiChat(String message) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/ai/chat'),
-        headers: await getHeaders(),
-        body: jsonEncode({'message': message}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return {
-          'success': true,
-          'response': data['ai_response'],
-          'message': data['message'],
-        };
-      } else {
-        return {'success': false, 'message': 'Chat failed'};
       }
     } catch (e) {
       return {'success': false, 'message': 'Network error: $e'};

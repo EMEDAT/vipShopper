@@ -12,15 +12,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // API Middleware Stack - THIS WAS MISSING!
+        // API Middleware Stack
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
         
-        // Enable CORS for API routes
+        // Enhanced CORS for Flutter Web
         $middleware->api([
             \Fruitcake\Cors\HandleCors::class,
         ]);
+        
+        // Configure CORS globally
+        $middleware->append(\Fruitcake\Cors\HandleCors::class);
         
         // Ensure proper API throttling
         $middleware->throttleApi();
