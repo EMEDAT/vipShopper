@@ -78,11 +78,11 @@ class VIPShopperApp extends StatelessWidget {
         ),
         
         // Card Theme
-        cardTheme: CardTheme(
-          color: const Color(0xFF1A1A1A),
+        cardTheme: const CardThemeData(
+          color: Color(0xFF1A1A1A),
           elevation: 8,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
         ),
       ),

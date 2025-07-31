@@ -5,7 +5,7 @@ import '../../models/product.dart';
 import '../../widgets/product_card.dart';
 import '../auth/login_screen.dart';
 import 'search_screen.dart';
-import 'vip_products_screen.dart';
+import '../../widgets/vip_products_screen.dart';
 import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
