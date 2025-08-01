@@ -15,9 +15,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   String _aiResponse = '';
   bool _isLoadingAI = false;
   final _chatController = TextEditingController();
-  late AnimationController _profileAnimationController;
   late AnimationController _cardAnimationController;
-  late Animation<double> _profileAnimation;
   late Animation<double> _cardAnimation;
 
   @override
@@ -27,34 +25,21 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   void _initAnimations() {
-    _profileAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-    
     _cardAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
-    );
-
-    _profileAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _profileAnimationController, curve: Curves.easeOutCubic),
     );
 
     _cardAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _cardAnimationController, curve: Curves.easeOutBack),
+      CurvedAnimation(parent: _cardAnimationController, curve: Curves.easeOut),
     );
 
-    _profileAnimationController.forward();
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _cardAnimationController.forward();
-    });
+    _cardAnimationController.forward();
   }
 
   @override
   void dispose() {
     _chatController.dispose();
-    _profileAnimationController.dispose();
     _cardAnimationController.dispose();
     super.dispose();
   }
@@ -273,67 +258,56 @@ class _ProfileScreenState extends State<ProfileScreen>
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 80, left: 24, right: 24),
-                    child: AnimatedBuilder(
-                      animation: _profileAnimation,
-                      builder: (context, child) {
-                        return Transform.translate(
-                          offset: Offset(0, 30 * (1 - _profileAnimation.value)),
-                          child: Opacity(
-                            opacity: _profileAnimation.value,
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: const RadialGradient(
-                                      colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFFFFD700).withOpacity(0.4),
-                                        blurRadius: 20,
-                                        spreadRadius: 2,
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                    Icons.person,
-                                    size: 32,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'PLATINUM MEMBER',
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 11,
-                                          color: Colors.white70,
-                                          letterSpacing: 2,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Premium access enabled',
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 14,
-                                          color: const Color(0xFFFFD700),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const RadialGradient(
+                              colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFFD700).withOpacity(0.4),
+                                blurRadius: 20,
+                                spreadRadius: 2,
+                              ),
+                            ],
                           ),
-                        );
-                      },
+                          child: const Icon(
+                            Icons.person,
+                            size: 32,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'PLATINUM MEMBER',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 11,
+                                  color: Colors.white70,
+                                  letterSpacing: 2,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Premium access enabled',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 14,
+                                  color: const Color(0xFFFFD700),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -349,117 +323,114 @@ class _ProfileScreenState extends State<ProfileScreen>
                 AnimatedBuilder(
                   animation: _cardAnimation,
                   builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 50 * (1 - _cardAnimation.value)),
-                      child: Opacity(
-                        opacity: _cardAnimation.value,
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                const Color(0xFFFFD700).withOpacity(0.1),
-                                const Color(0xFFB8860B).withOpacity(0.05),
+                    return Opacity(
+                      opacity: _cardAnimation.value.clamp(0.0, 1.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFFFFD700).withOpacity(0.1),
+                              const Color(0xFFB8860B).withOpacity(0.05),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFFFFD700).withOpacity(0.3),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFFD700).withOpacity(0.1),
+                              blurRadius: 20,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: const RadialGradient(
+                                      colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFFFFD700).withOpacity(0.3),
+                                        blurRadius: 15,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.person,
+                                    size: 36,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Demo User',
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+                                          ),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.workspace_premium,
+                                              size: 16,
+                                              color: Colors.black,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              'Platinum Member',
+                                              style: GoogleFonts.montserrat(
+                                                fontSize: 12,
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'Total Spent: \$25,000.00',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 14,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: const Color(0xFFFFD700).withOpacity(0.3),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFFFD700).withOpacity(0.1),
-                                blurRadius: 20,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 70,
-                                    height: 70,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: const RadialGradient(
-                                        colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color(0xFFFFD700).withOpacity(0.3),
-                                          blurRadius: 15,
-                                          spreadRadius: 2,
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.person,
-                                      size: 36,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Demo User',
-                                          style: GoogleFonts.playfairDisplay(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
-                                            ),
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.workspace_premium,
-                                                size: 16,
-                                                color: Colors.black,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                'Platinum Member',
-                                                style: GoogleFonts.montserrat(
-                                                  fontSize: 12,
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          'Total Spent: \$25,000.00',
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 14,
-                                            color: Colors.white70,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                          ],
                         ),
                       ),
                     );
@@ -489,63 +460,60 @@ class _ProfileScreenState extends State<ProfileScreen>
                 AnimatedBuilder(
                   animation: _cardAnimation,
                   builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 30 * (1 - _cardAnimation.value)),
-                      child: Opacity(
-                        opacity: _cardAnimation.value,
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                const Color(0xFFFFD700).withOpacity(0.08),
-                                const Color(0xFFB8860B).withOpacity(0.03),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: const Color(0xFFFFD700).withOpacity(0.2),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: const Color(0xFFFFD700).withOpacity(0.2),
-                                    ),
-                                    child: const Icon(
-                                      Icons.workspace_premium,
-                                      color: Color(0xFFFFD700),
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Platinum Benefits',
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFFFFD700),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              _buildBenefitItem('20% cashback on all purchases', Icons.account_balance_wallet),
-                              _buildBenefitItem('Free shipping worldwide', Icons.local_shipping),
-                              _buildBenefitItem('Priority support', Icons.headset_mic),
-                              _buildBenefitItem('Exclusive products access', Icons.diamond),
-                              _buildBenefitItem('Personal shopper service', Icons.person_pin),
+                    return Opacity(
+                      opacity: _cardAnimation.value.clamp(0.0, 1.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFFFFD700).withOpacity(0.08),
+                              const Color(0xFFB8860B).withOpacity(0.03),
                             ],
                           ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFFFD700).withOpacity(0.2),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                                  ),
+                                  child: const Icon(
+                                    Icons.workspace_premium,
+                                    color: Color(0xFFFFD700),
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Platinum Benefits',
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFFFFD700),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            _buildBenefitItem('20% cashback on all purchases', Icons.account_balance_wallet),
+                            _buildBenefitItem('Free shipping worldwide', Icons.local_shipping),
+                            _buildBenefitItem('Priority support', Icons.headset_mic),
+                            _buildBenefitItem('Exclusive products access', Icons.diamond),
+                            _buildBenefitItem('Personal shopper service', Icons.person_pin),
+                          ],
                         ),
                       ),
                     );
@@ -557,144 +525,141 @@ class _ProfileScreenState extends State<ProfileScreen>
                 AnimatedBuilder(
                   animation: _cardAnimation,
                   builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 20 * (1 - _cardAnimation.value)),
-                      child: Opacity(
-                        opacity: _cardAnimation.value,
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                const Color(0xFFFFD700).withOpacity(0.05),
-                                const Color(0xFFB8860B).withOpacity(0.02),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: const Color(0xFFFFD700).withOpacity(0.2),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: const Color(0xFFFFD700).withOpacity(0.2),
-                                    ),
-                                    child: const Icon(
-                                      Icons.smart_toy,
-                                      color: Color(0xFFFFD700),
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'AI Concierge',
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFFFFD700),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              if (_aiResponse.isNotEmpty) ...[
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFFD700).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    _aiResponse,
-                                    style: GoogleFonts.montserrat(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      height: 1.5,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-                              
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _chatController,
-                                      style: GoogleFonts.montserrat(color: Colors.white),
-                                      decoration: InputDecoration(
-                                        hintText: 'Ask your AI concierge anything...',
-                                        hintStyle: GoogleFonts.montserrat(
-                                          color: Colors.white54,
-                                        ),
-                                        filled: true,
-                                        fillColor: Colors.white.withOpacity(0.05),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide(
-                                            color: const Color(0xFFFFD700).withOpacity(0.3),
-                                          ),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide(
-                                            color: const Color(0xFFFFD700).withOpacity(0.3),
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(
-                                            color: Color(0xFFFFD700),
-                                          ),
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 12),
-                                      ),
-                                      onSubmitted: _sendAIMessage,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: IconButton(
-                                      onPressed: _isLoadingAI 
-                                          ? null 
-                                          : () => _sendAIMessage(_chatController.text),
-                                      icon: _isLoadingAI
-                                          ? const SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(
-                                                color: Colors.black,
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : const Icon(
-                                              Icons.send,
-                                              color: Colors.black,
-                                            ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                    return Opacity(
+                      opacity: _cardAnimation.value.clamp(0.0, 1.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFFFFD700).withOpacity(0.05),
+                              const Color(0xFFB8860B).withOpacity(0.02),
                             ],
                           ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFFFD700).withOpacity(0.2),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                                  ),
+                                  child: const Icon(
+                                    Icons.smart_toy,
+                                    color: Color(0xFFFFD700),
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'AI Concierge',
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFFFFD700),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            if (_aiResponse.isNotEmpty) ...[
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFD700).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  _aiResponse,
+                                  style: GoogleFonts.montserrat(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                            
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _chatController,
+                                    style: GoogleFonts.montserrat(color: Colors.white),
+                                    decoration: InputDecoration(
+                                      hintText: 'Ask your AI concierge anything...',
+                                      hintStyle: GoogleFonts.montserrat(
+                                        color: Colors.white54,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.05),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: const Color(0xFFFFD700).withOpacity(0.3),
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: const Color(0xFFFFD700).withOpacity(0.3),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                          color: Color(0xFFFFD700),
+                                        ),
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
+                                    ),
+                                    onSubmitted: _sendAIMessage,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: _isLoadingAI 
+                                        ? null 
+                                        : () => _sendAIMessage(_chatController.text),
+                                    icon: _isLoadingAI
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.black,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.send,
+                                            color: Colors.black,
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     );
