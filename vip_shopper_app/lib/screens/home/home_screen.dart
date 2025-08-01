@@ -25,12 +25,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
   final CartService _cartService = CartService();
+  String _userTier = 'bronze';
 
   @override
   void initState() {
     super.initState();
     _loadProducts();
     _initAnimations();
+    _loadUserInfo();
   }
 
   void _initAnimations() {
@@ -50,6 +52,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  Future<void> _loadUserInfo() async {
+    try {
+      final userInfo = await ApiService.getCurrentUser();
+      if (mounted) {
+        setState(() {
+          _userTier = userInfo['vip_tier'] ?? 'bronze';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading user info: $e');
+    }
+  }
+
   Future<void> _loadProducts() async {
     try {
       setState(() {
@@ -59,9 +74,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
       final products = await ApiService.getProducts();
       
+      // Apply tier-based product limits
+      final int productLimit = _getProductLimit();
+      final limitedProducts = products.take(productLimit).toList();
+      
       if (mounted) {
         setState(() {
-          _products = products;
+          _products = limitedProducts;
           _isLoading = false;
         });
       }
@@ -73,6 +92,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         });
       }
     }
+  }
+
+  int _getProductLimit() {
+    // VIP users (gold/platinum) see 30 products, regular users see 15
+    return ['gold', 'platinum'].contains(_userTier) ? 30 : 15;
+  }
+
+  String _getTierDisplayText() {
+    final limit = _getProductLimit();
+    final tierText = ['gold', 'platinum'].contains(_userTier) ? 'VIP' : 'Regular';
+    return 'Showing $limit products for $tierText members';
   }
 
   void _showCartModal() {
@@ -338,7 +368,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
+                        Text(
+                          _getTierDisplayText(),
+                          style: GoogleFonts.montserrat(
+                            color: const Color(0xFFFFD700),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         Text(
                           'Discover premium products crafted for the discerning few',
                           style: GoogleFonts.montserrat(
@@ -412,10 +451,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               padding: const EdgeInsets.all(16),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.8,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
+                  crossAxisCount: 3,
+                  childAspectRatio: 0.7,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
