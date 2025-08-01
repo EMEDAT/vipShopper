@@ -153,7 +153,8 @@ class ApiService {
     }
   }
 
-  static Future<List<Product>> getVipProducts() async {
+  // CRITICAL FIX: Return structured data instead of List<Product>
+  static Future<Map<String, dynamic>> getVipProducts() async {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/products/vip'),
@@ -162,17 +163,46 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final products = data['products']['data'] as List;
-        return products.map((json) => Product.fromJson(json)).toList();
-      } else if (response.statusCode == 403) {
-        // User doesn't have VIP access, return limited products from regular endpoint
-        return await getProducts();
+        final products = (data['products']['data'] as List?)
+            ?.map((json) => Product.fromJson(json))
+            .toList() ?? [];
+        
+        return {
+          'success': true,
+          'products': products,
+          'access_level': data['access_level'] ?? 'full',
+          'message': data['message'] ?? 'VIP products loaded',
+          'vip_tier': data['vip_tier'] ?? 'gold'
+        };
+      } else if (response.statusCode == 403 || response.statusCode == 401) {
+        // CRITICAL FIX: Return access denied data, NO fallback to getProducts()
+        final data = jsonDecode(response.body);
+        return {
+          'success': false,
+          'products': <Product>[], // Empty list - NO regular products!
+          'access_level': 'denied',
+          'message': data['message'] ?? 'VIP access required',
+          'vip_tier': data['vip_tier'] ?? 'bronze'
+        };
       } else {
-        throw Exception('Failed to load VIP products');
+        final data = jsonDecode(response.body);
+        return {
+          'success': false,
+          'products': <Product>[],
+          'access_level': 'error',
+          'message': data['message'] ?? 'Failed to load VIP products',
+          'vip_tier': 'bronze'
+        };
       }
     } catch (e) {
-      // Fallback to regular products if VIP fails
-      return await getProducts();
+      // CRITICAL FIX: No fallback to getProducts() on network error
+      return {
+        'success': false,
+        'products': <Product>[],
+        'access_level': 'error',
+        'message': 'Network error: $e',
+        'vip_tier': 'bronze'
+      };
     }
   }
 

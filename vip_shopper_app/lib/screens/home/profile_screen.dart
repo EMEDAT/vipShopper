@@ -47,7 +47,15 @@ class _ProfileScreenState extends State<ProfileScreen>
       final result = await ApiService.getCurrentUser();
       if (mounted && result['success']) {
         setState(() {
-          _currentUser = result['user'];
+          // CRITICAL FIX: Create User object from flat API response
+          _currentUser = User.fromApiResponse({
+            'id': result['id'],
+            'name': result['name'],
+            'email': result['email'],
+            'vip_tier': result['vip_tier'],
+            'total_spent': result['total_spent'],
+            'preferences': result['preferences'],
+          });
           _vipStatus = result['vip_status'];
           _isLoadingUser = false;
         });

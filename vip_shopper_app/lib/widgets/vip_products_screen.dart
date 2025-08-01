@@ -44,13 +44,26 @@ class _VipProductsScreenState extends State<VipProductsScreen>
         _error = '';
       });
 
-        final products = await ApiService.getVipProducts();
-        if (mounted) {
+      // CRITICAL FIX: Handle Map response from updated API service
+      final result = await ApiService.getVipProducts();
+      if (mounted) {
         setState(() {
-            _vipProducts = products;
-            _isLoading = false;
+          if (result is List<Product>) {
+            // Handle List response (for compatibility)
+            _vipProducts = result;
+          } else if (result is Map<String, dynamic>) {
+            // Handle Map response (new structure)
+            _vipProducts = result['products'] ?? <Product>[];
+            _userTier = result['vip_tier'] ?? 'bronze';
+          } else {
+            _vipProducts = <Product>[];
+          }
+          _isLoading = false;
         });
-        _slideController.forward();
+        
+        if (_vipProducts.isNotEmpty) {
+          _slideController.forward();
+        }
       }
     } catch (e) {
       if (mounted) {

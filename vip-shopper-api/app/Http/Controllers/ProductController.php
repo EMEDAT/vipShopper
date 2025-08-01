@@ -17,8 +17,7 @@ class ProductController extends Controller
         if ($user) {
             if (in_array($user->vip_tier, ['gold', 'platinum'])) {
                 $productLimit = 30; // VIP users get 30 products
-                // FIXED: VIP users should see ALL products (regular + VIP) in main feed
-                // This is correct behavior for the main products endpoint
+                // VIP users see ALL products (regular + VIP) in main feed
             } else {
                 $productLimit = 15; // Bronze/Silver users get 15 products
                 $query->regular(); // Only non-VIP products
@@ -50,24 +49,20 @@ class ProductController extends Controller
             ], 401);
         }
         
+        // CRITICAL FIX: Regular users get ZERO products, no preview
         if (!in_array($user->vip_tier, ['gold', 'platinum'])) {
-            // Regular users: Limited VIP preview (only first 5 products)
-            $vipProducts = Product::vipOnly()
-                ->latest()
-                ->paginate(5);
-
             return response()->json([
-                'message' => "Limited VIP preview for {$user->name}! Upgrade for full access. 🔒",
-                'products' => $vipProducts,
+                'message' => "🔒 Upgrade to Gold or Platinum to access VIP products! Currently {$user->vip_tier} tier.",
+                'products' => [], // EMPTY - NO PRODUCTS FOR REGULAR USERS
                 'vip_tier' => $user->vip_tier,
-                'product_limit' => 5,
-                'access_level' => 'limited',
+                'product_limit' => 0,
+                'access_level' => 'denied',
                 'total_vip_products' => Product::vipOnly()->count(),
                 'upgrade_benefits' => $this->getUpgradeBenefits($user->vip_tier)
-            ]);
+            ], 403);
         }
 
-        // VIP users: ALL 30 VIP-exclusive products, NEVER regular products
+        // VIP users: ALL VIP-exclusive products
         $vipProducts = Product::vipOnly()
             ->latest()
             ->paginate(30);
@@ -124,7 +119,6 @@ class ProductController extends Controller
         ]);
     }
 
-    // NEW: Separate endpoint for regular products only
     public function regularProducts(Request $request)
     {
         $products = Product::regular()
