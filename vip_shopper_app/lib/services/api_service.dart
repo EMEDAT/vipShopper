@@ -5,7 +5,7 @@ import '../models/user.dart';
 import '../models/product.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8000/api';
+  static const String baseUrl = 'https://vipshopper-production.up.railway.app/api';
   
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
