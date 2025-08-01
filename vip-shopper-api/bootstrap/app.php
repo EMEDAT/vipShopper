@@ -12,12 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Pure API authentication - no stateful middleware
         $middleware->alias([
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
-        ]);
-        
-        $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

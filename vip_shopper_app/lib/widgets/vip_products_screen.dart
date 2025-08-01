@@ -5,7 +5,12 @@ import '../../models/product.dart';
 import '../../widgets/product_card.dart';
 
 class VipProductsScreen extends StatefulWidget {
-  const VipProductsScreen({super.key});
+  final VoidCallback? onNavigateToHome;
+  
+  const VipProductsScreen({
+    super.key,
+    this.onNavigateToHome,
+  });
 
   @override
   State<VipProductsScreen> createState() => _VipProductsScreenState();
@@ -226,8 +231,7 @@ class _VipProductsScreenState extends State<VipProductsScreen> {
                     
                     ElevatedButton(
                       onPressed: () {
-                        // Navigate back to regular products
-                        Navigator.of(context).pop();
+                        widget.onNavigateToHome?.call(); 
                       },
                       child: Text(
                         'VIEW REGULAR COLLECTION',

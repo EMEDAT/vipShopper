@@ -251,7 +251,13 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return _buildHome();
       case 1:
-        return const VipProductsScreen();
+      return VipProductsScreen(
+          onNavigateToHome: () {
+          setState(() {
+              _currentIndex = 0;
+          });
+        },
+      );
       case 2:
         return const SearchScreen();
       case 3:
