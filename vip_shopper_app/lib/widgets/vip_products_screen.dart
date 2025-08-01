@@ -18,6 +18,8 @@ class _VipProductsScreenState extends State<VipProductsScreen>
   bool _isLoading = true;
   String _error = '';
   String _userTier = 'bronze';
+  String _accessLevel = 'denied';
+  Map<String, dynamic>? _upgradeInfo;
   late AnimationController _slideController;
 
   @override
@@ -36,7 +38,7 @@ class _VipProductsScreenState extends State<VipProductsScreen>
     super.dispose();
   }
 
-
+  // 🔥 CRITICAL FIX: Updated to handle the new API response structure
   Future<void> _loadVipProducts() async {
     try {
       setState(() {
@@ -47,29 +49,189 @@ class _VipProductsScreenState extends State<VipProductsScreen>
       final result = await ApiService.getVipProducts();
       if (mounted) {
         setState(() {
-          // ApiService.getVipProducts() always returns Map<String, dynamic>
+          // CRITICAL FIX: Check both success AND access_level
+          _accessLevel = result['access_level'] ?? 'denied';
           final products = result['products'] as List<dynamic>? ?? [];
-          _vipProducts = products.map((json) => Product.fromJson(json)).toList();
+          
+          // Handle both Product objects and JSON maps
+          _vipProducts = products.map((product) {
+            if (product is Product) {
+              return product;
+            } else {
+              return Product.fromJson(product);
+            }
+          }).toList();
+          
           _userTier = result['vip_tier'] ?? 'bronze';
+          _upgradeInfo = result['upgrade_benefits'];
           _isLoading = false;
+          
+          // FIXED: Only animate if user has access AND has products
+          if (_accessLevel == 'full' && _vipProducts.isNotEmpty) {
+            _slideController.forward();
+          }
         });
-        
-        if (_vipProducts.isNotEmpty) {
-          _slideController.forward();
-        }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _error = e.toString();
           _isLoading = false;
+          _accessLevel = 'denied';
         });
       }
     }
   }
 
-  bool get _hasVipAccess => ['gold', 'platinum'].contains(_userTier);
+  // 🔥 CRITICAL FIX: Check access level properly
+  bool get _hasVipAccess {
+    return _accessLevel == 'full' && ['gold', 'platinum'].contains(_userTier) && _error.isEmpty;
+  }
 
+  void _showProductDetails(Product product) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.95,
+        minChildSize: 0.5,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 50,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[600],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.network(
+                    product.imageUrl,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 200,
+                      color: Colors.grey[800],
+                      child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '✨ VIP EXCLUSIVE',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '\$${product.price.toStringAsFixed(2)}',
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFFFFD700),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  product.name,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  product.category,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 14,
+                    color: const Color(0xFFFFD700),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  product.description,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 16,
+                    color: Colors.white70,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Add to cart logic here
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${product.name} added to cart! 🛒'),
+                          backgroundColor: const Color(0xFFFFD700),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFD700),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: Text(
+                      'Add to Cart',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 🔥 IMPROVED: Better access denied widget with upgrade info
   Widget _buildAccessDenied() {
     return Center(
       child: Container(
@@ -117,7 +279,7 @@ class _VipProductsScreenState extends State<VipProductsScreen>
             ),
             const SizedBox(height: 24),
             Text(
-              'Limited VIP Access',
+              'VIP Access Required',
               style: GoogleFonts.playfairDisplay(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -126,7 +288,7 @@ class _VipProductsScreenState extends State<VipProductsScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              'Upgrade to Gold or Platinum\nfor full VIP product access',
+              'Upgrade to Gold or Platinum\nfor exclusive VIP product access',
               textAlign: TextAlign.center,
               style: GoogleFonts.montserrat(
                 fontSize: 16,
@@ -135,14 +297,80 @@ class _VipProductsScreenState extends State<VipProductsScreen>
               ),
             ),
             const SizedBox(height: 24),
-            Text(
-              'Current Tier: ${_userTier.toUpperCase()}',
-              style: GoogleFonts.montserrat(
-                fontSize: 14,
-                color: const Color(0xFFFFD700),
-                fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.red, width: 1),
+              ),
+              child: Text(
+                'Current Tier: ${_userTier.toUpperCase()}',
+                style: GoogleFonts.montserrat(
+                  fontSize: 12,
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
+            
+            // Show upgrade benefits if available
+            if (_upgradeInfo != null) ...[
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFD700).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFFFD700).withOpacity(0.3),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Upgrade to ${_upgradeInfo!['next_tier']}',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFFFFD700),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _upgradeInfo!['spend_required'] ?? '',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ...(_upgradeInfo!['benefits'] as List<dynamic>? ?? [])
+                        .map((benefit) => Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle,
+                                    size: 16,
+                                    color: Color(0xFFFFD700),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    benefit.toString(),
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 12,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ))
+                        .toList(),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -167,98 +395,110 @@ class _VipProductsScreenState extends State<VipProductsScreen>
               backgroundColor: Colors.black,
               automaticallyImplyLeading: false,
               title: Text(
-                'VIP EXCLUSIVES',
+                'VIP Exclusives',
                 style: GoogleFonts.playfairDisplay(
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFFFFD700),
-                  fontSize: ResponsiveGrid.getTitleFontSize(context),
                 ),
               ),
-              centerTitle: false,
-                flexibleSpace: FlexibleSpaceBar(
+              flexibleSpace: FlexibleSpaceBar(
                 background: Container(
-                    decoration: const BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFF000000), Color(0xFF1A1A1A), Color(0xFF2A2A2A)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFF000000),
+                        Color(0xFF1A1A1A),
+                        Color(0xFF2A2A2A),
+                      ],
                     ),
-                    ),
-                    child: SafeArea(
-                    child: LayoutBuilder(
-                        builder: (context, constraints) {
-                        // Calculate available space
-                        final availableHeight = constraints.maxHeight;
-                        final isSmallScreen = availableHeight < 180;
-                        
-                        return Padding(
-                            padding: EdgeInsets.only(
-                            top: availableHeight * 0.2, // Dynamic top based on available height
-                            left: 16,
-                            right: 16,
-                            bottom: 8,
-                            ),
-                            child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                  ),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 60),
+                          Row(
                             children: [
-                                Container(
-                                padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
+                              Container(
+                                padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: const RadialGradient(
-                                    colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+                                  shape: BoxShape.circle,
+                                  gradient: const RadialGradient(
+                                    colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFFFFD700).withOpacity(0.4),
+                                      blurRadius: 20,
+                                      spreadRadius: 2,
                                     ),
+                                  ],
                                 ),
-                                child: Icon(
-                                    Icons.diamond,
-                                    size: isSmallScreen ? 16 : 24,
-                                    color: Colors.black,
+                                child: const Icon(
+                                  Icons.diamond,
+                                  size: 32,
+                                  color: Colors.black,
                                 ),
-                                ),
-                                SizedBox(width: isSmallScreen ? 8 : 16),
-                                Expanded(
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
                                 child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text(
-                                        'Rich and',
-                                        style: GoogleFonts.montserrat(
-                                        color: Colors.white70,
-                                        fontSize: isSmallScreen ? 12 : 14,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                        'EXCLUSIVE ACCESS',
-                                        style: GoogleFonts.playfairDisplay(
-                                        color: const Color(0xFFFFD700),
-                                        fontSize: isSmallScreen ? 14 : 16,
+                                      'VIP EXCLUSIVES',
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: 32,
                                         fontWeight: FontWeight.bold,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                                        color: const Color(0xFFFFD700),
+                                        height: 1.1,
+                                      ),
                                     ),
-                                    ],
+                                    Text(
+                                      _hasVipAccess 
+                                          ? 'Premium products for VIP members'
+                                          : 'Unlock exclusive access',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 14,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                ),
+                              ),
                             ],
-                            ),
-                        );
-                        },
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
-                    ),
+                  ),
                 ),
-                ),
+              ),
             ),
             
+            // 🔥 CRITICAL FIX: Show different content based on access level and loading state
             if (_isLoading)
               const SliverFillRemaining(
                 child: Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFFFFD700),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        color: Color(0xFFFFD700),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Loading VIP products...',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ],
                   ),
                 ),
               )
@@ -268,16 +508,16 @@ class _VipProductsScreenState extends State<VipProductsScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.error_outline,
                         size: 64,
-                        color: Colors.red.withOpacity(0.7),
+                        color: Colors.red,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Something went wrong',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 20,
+                        'Error loading VIP products',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
@@ -285,27 +525,28 @@ class _VipProductsScreenState extends State<VipProductsScreen>
                       const SizedBox(height: 8),
                       Text(
                         _error,
-                        style: GoogleFonts.montserrat(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
                         textAlign: TextAlign.center,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: _loadVipProducts,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFD700),
                           foregroundColor: Colors.black,
                         ),
-                        child: Text(
-                          'Try Again',
-                          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
-                        ),
+                        child: const Text('Retry'),
                       ),
                     ],
                   ),
                 ),
+              )
+            else if (!_hasVipAccess) // FIXED: This checks actual access properly
+              SliverFillRemaining(
+                child: _buildAccessDenied(),
               )
             else if (_vipProducts.isEmpty)
               SliverFillRemaining(
@@ -313,30 +554,23 @@ class _VipProductsScreenState extends State<VipProductsScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFFFFD700).withOpacity(0.1),
-                        ),
-                        child: const Icon(
-                          Icons.diamond_outlined,
-                          size: 48,
-                          color: Color(0xFFFFD700),
-                        ),
+                      const Icon(
+                        Icons.inventory_2_outlined,
+                        size: 64,
+                        color: Colors.white70,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       Text(
-                        'No VIP products available',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 20,
+                        'No VIP products available yet',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       Text(
-                        'Check back soon for exclusive releases',
+                        'Check back soon for exclusive items',
                         style: GoogleFonts.montserrat(
                           fontSize: 14,
                           color: Colors.white70,
@@ -350,37 +584,26 @@ class _VipProductsScreenState extends State<VipProductsScreen>
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: ResponsiveGrid.getCrossAxisCount(context),
-                crossAxisSpacing: ResponsiveGrid.getSpacing(context),
-                mainAxisSpacing: ResponsiveGrid.getSpacing(context),
-                childAspectRatio: ResponsiveGrid.getChildAspectRatio(context),
-                ),
+                  gridDelegate: ResponsiveGrid.getSliverGridDelegate(context),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final product = _vipProducts[index];
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                          begin: Offset(0, 0.3 + (index * 0.1)),
-                          end: Offset.zero,
-                        ).animate(CurvedAnimation(
-                          parent: _slideController,
-                          curve: Interval(
-                            (index * 0.1).clamp(0.0, 1.0),
-                            1.0,
-                            curve: Curves.easeOutCubic,
-                          ),
-                        )),
-                        child: FadeTransition(
-                          opacity: CurvedAnimation(
-                            parent: _slideController,
-                            curve: Interval(
-                              (index * 0.1).clamp(0.0, 1.0),
-                              1.0,
+                      return AnimatedBuilder(
+                        animation: _slideController,
+                        builder: (context, child) {
+                          final animationValue = Curves.easeOutBack.transform(
+                            (_slideController.value - (index * 0.1)).clamp(0.0, 1.0),
+                          );
+                          return Transform.translate(
+                            offset: Offset(0, 50 * (1 - animationValue)),
+                            child: Opacity(
+                              opacity: animationValue,
+                              child: ProductCard(
+                                product: _vipProducts[index],
+                                onTap: () => _showProductDetails(_vipProducts[index]),
+                              ),
                             ),
-                          ),
-                          child: ProductCard(product: product),
-                        ),
+                          );
+                        },
                       );
                     },
                     childCount: _vipProducts.length,
