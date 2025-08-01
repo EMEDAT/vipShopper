@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/api_service.dart';
+import '../../models/user.dart';
 import '../auth/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -14,14 +15,19 @@ class _ProfileScreenState extends State<ProfileScreen>
     with TickerProviderStateMixin {
   String _aiResponse = '';
   bool _isLoadingAI = false;
+  bool _isLoadingUser = true;
   final _chatController = TextEditingController();
   late AnimationController _cardAnimationController;
   late Animation<double> _cardAnimation;
+  
+  User? _currentUser;
+  Map<String, dynamic>? _vipStatus;
 
   @override
   void initState() {
     super.initState();
     _initAnimations();
+    _loadCurrentUser();
   }
 
   void _initAnimations() {
@@ -33,8 +39,30 @@ class _ProfileScreenState extends State<ProfileScreen>
     _cardAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _cardAnimationController, curve: Curves.easeOut),
     );
+  }
 
-    _cardAnimationController.forward();
+  Future<void> _loadCurrentUser() async {
+    try {
+      final result = await ApiService.getCurrentUser();
+      if (mounted && result['success']) {
+        setState(() {
+          _currentUser = result['user'];
+          _vipStatus = result['vip_status'];
+          _isLoadingUser = false;
+        });
+        _cardAnimationController.forward();
+      } else {
+        setState(() {
+          _isLoadingUser = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingUser = false;
+        });
+      }
+    }
   }
 
   @override
@@ -42,6 +70,45 @@ class _ProfileScreenState extends State<ProfileScreen>
     _chatController.dispose();
     _cardAnimationController.dispose();
     super.dispose();
+  }
+
+  String get _tierDisplayName {
+    if (_currentUser?.vipTier == null) return 'MEMBER';
+    return '${_currentUser!.vipTier.toUpperCase()} MEMBER';
+  }
+
+  String get _tierSubtitle {
+    switch (_currentUser?.vipTier) {
+      case 'platinum':
+        return 'Premium access enabled';
+      case 'gold':
+        return 'VIP access enabled';
+      case 'silver':
+        return 'Enhanced benefits active';
+      case 'bronze':
+      default:
+        return 'Standard membership';
+    }
+  }
+
+  Color get _tierColor {
+    switch (_currentUser?.vipTier) {
+      case 'platinum':
+        return const Color(0xFFE5E4E2);
+      case 'gold':
+        return const Color(0xFFFFD700);
+      case 'silver':
+        return const Color(0xFFC0C0C0);
+      case 'bronze':
+      default:
+        return const Color(0xFFCD7F32);
+    }
+  }
+
+  List<String> get _currentBenefits {
+    return (_vipStatus?['benefits'] as List<dynamic>?)
+        ?.map((benefit) => benefit.toString())
+        .toList() ?? ['Basic membership benefits'];
   }
 
   Future<void> _sendAIMessage(String message) async {
@@ -145,25 +212,25 @@ class _ProfileScreenState extends State<ProfileScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFFFFD700).withOpacity(0.1),
-                  const Color(0xFFB8860B).withOpacity(0.05),
+                  _tierColor.withOpacity(0.1),
+                  _tierColor.withOpacity(0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFFFD700).withOpacity(0.3),
+                color: _tierColor.withOpacity(0.3),
               ),
             ),
             child: Column(
               children: [
-                Icon(icon, color: const Color(0xFFFFD700), size: 24),
+                Icon(icon, color: _tierColor, size: 24),
                 const SizedBox(height: 8),
                 Text(
                   value,
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFFFFD700),
+                    color: _tierColor,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -192,9 +259,9 @@ class _ProfileScreenState extends State<ProfileScreen>
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFFFD700).withOpacity(0.2),
+              color: _tierColor.withOpacity(0.2),
             ),
-            child: Icon(icon, color: const Color(0xFFFFD700), size: 14),
+            child: Icon(icon, color: _tierColor, size: 14),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -214,6 +281,25 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingUser) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: const Color(0xFFFFD700)),
+              const SizedBox(height: 16),
+              Text(
+                'Loading profile...',
+                style: GoogleFonts.montserrat(color: Colors.white70),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: CustomScrollView(
@@ -259,17 +345,18 @@ class _ProfileScreenState extends State<ProfileScreen>
                   child: Padding(
                     padding: const EdgeInsets.only(top: 80, left: 24, right: 24),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center, // FIX ALIGNMENT
                       children: [
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: const RadialGradient(
-                              colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+                            gradient: RadialGradient(
+                              colors: [_tierColor, _tierColor.withOpacity(0.7)],
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFFD700).withOpacity(0.4),
+                                color: _tierColor.withOpacity(0.4),
                                 blurRadius: 20,
                                 spreadRadius: 2,
                               ),
@@ -285,9 +372,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center, // FIX ALIGNMENT
                             children: [
                               Text(
-                                'PLATINUM MEMBER',
+                                _tierDisplayName,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 11,
                                   color: Colors.white70,
@@ -297,10 +385,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Premium access enabled',
+                                _tierSubtitle,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
-                                  color: const Color(0xFFFFD700),
+                                  color: _tierColor,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -332,17 +420,17 @@ class _ProfileScreenState extends State<ProfileScreen>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFFFFD700).withOpacity(0.1),
-                              const Color(0xFFB8860B).withOpacity(0.05),
+                              _tierColor.withOpacity(0.1),
+                              _tierColor.withOpacity(0.05),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFFFFD700).withOpacity(0.3),
+                            color: _tierColor.withOpacity(0.3),
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFFFD700).withOpacity(0.1),
+                              color: _tierColor.withOpacity(0.1),
                               blurRadius: 20,
                               spreadRadius: 2,
                             ),
@@ -357,12 +445,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   height: 70,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    gradient: const RadialGradient(
-                                      colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+                                    gradient: RadialGradient(
+                                      colors: [_tierColor, _tierColor.withOpacity(0.7)],
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFFFFD700).withOpacity(0.3),
+                                        color: _tierColor.withOpacity(0.3),
                                         blurRadius: 15,
                                         spreadRadius: 2,
                                       ),
@@ -380,7 +468,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Demo User',
+                                        _currentUser?.name ?? 'User',
                                         style: GoogleFonts.playfairDisplay(
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold,
@@ -392,8 +480,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12, vertical: 4),
                                         decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+                                          gradient: LinearGradient(
+                                            colors: [_tierColor, _tierColor.withOpacity(0.7)],
                                           ),
                                           borderRadius: BorderRadius.circular(12),
                                         ),
@@ -407,7 +495,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                             ),
                                             const SizedBox(width: 6),
                                             Text(
-                                              'Platinum Member',
+                                              _tierDisplayName,
                                               style: GoogleFonts.montserrat(
                                                 fontSize: 12,
                                                 color: Colors.black,
@@ -419,7 +507,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
-                                        'Total Spent: \$25,000.00',
+                                        'Total Spent: \$${(_currentUser?.totalSpent ?? 0).toStringAsFixed(2)}',
                                         style: GoogleFonts.montserrat(
                                           fontSize: 14,
                                           color: Colors.white70,
@@ -469,13 +557,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFFFFD700).withOpacity(0.08),
-                              const Color(0xFFB8860B).withOpacity(0.03),
+                              _tierColor.withOpacity(0.08),
+                              _tierColor.withOpacity(0.03),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(0xFFFFD700).withOpacity(0.2),
+                            color: _tierColor.withOpacity(0.2),
                           ),
                         ),
                         child: Column(
@@ -487,32 +575,35 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                                    color: _tierColor.withOpacity(0.2),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.workspace_premium,
-                                    color: Color(0xFFFFD700),
+                                    color: _tierColor,
                                     size: 20,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
-                                  'Platinum Benefits',
+                                  '${_tierDisplayName} Benefits',
                                   style: GoogleFonts.playfairDisplay(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xFFFFD700),
+                                    color: _tierColor,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
                             
-                            _buildBenefitItem('20% cashback on all purchases', Icons.account_balance_wallet),
-                            _buildBenefitItem('Free shipping worldwide', Icons.local_shipping),
-                            _buildBenefitItem('Priority support', Icons.headset_mic),
-                            _buildBenefitItem('Exclusive products access', Icons.diamond),
-                            _buildBenefitItem('Personal shopper service', Icons.person_pin),
+                            ..._currentBenefits.map((benefit) => _buildBenefitItem(
+                              benefit, 
+                              benefit.contains('cashback') ? Icons.account_balance_wallet :
+                              benefit.contains('shipping') ? Icons.local_shipping :
+                              benefit.contains('support') ? Icons.headset_mic :
+                              benefit.contains('products') ? Icons.diamond :
+                              Icons.star
+                            )).toList(),
                           ],
                         ),
                       ),
@@ -522,6 +613,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 
                 const SizedBox(height: 24),
                 
+                // AI Concierge section remains the same...
                 AnimatedBuilder(
                   animation: _cardAnimation,
                   builder: (context, child) {
