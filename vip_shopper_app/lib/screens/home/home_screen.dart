@@ -76,56 +76,89 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _showCartModal() {
+    debugPrint('Cart icon tapped - showing modal');
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const CartModal(),
-    );
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
+      builder: (BuildContext context) {
+        debugPrint('Building cart modal');
+        return const CartModal();
+      },
+    ).catchError((error) {
+      debugPrint('Error showing cart modal: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error opening cart: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    });
   }
 
   Widget _buildCartIcon() {
     return ListenableBuilder(
       listenable: _cartService,
       builder: (context, _) {
-        return Stack(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.shopping_cart, color: Color(0xFFFFD700)),
-              onPressed: _showCartModal,
-            ),
-            if (_cartService.itemCount > 0)
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.red.withOpacity(0.5),
-                        blurRadius: 4,
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(24),
+            onTap: () {
+              debugPrint('Cart icon tapped!');
+              _showCartModal();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(
+                    Icons.shopping_cart,
+                    color: Color(0xFFFFD700),
+                    size: 24,
+                  ),
+                  if (_cartService.itemCount > 0)
+                    Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.5),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          _cartService.itemCount > 99 
+                              ? '99+' 
+                              : _cartService.itemCount.toString(),
+                          style: GoogleFonts.montserrat(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ],
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 20,
-                    minHeight: 20,
-                  ),
-                  child: Text(
-                    _cartService.itemCount > 99 ? '99+' : _cartService.itemCount.toString(),
-                    style: GoogleFonts.montserrat(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                ],
               ),
-          ],
+            ),
+          ),
         );
       },
     );
@@ -275,8 +308,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               ),
                               child: const Icon(
                                 Icons.diamond,
-                                size: 32,
                                 color: Colors.black,
+                                size: 24,
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -285,27 +318,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'LUXURY • EXCLUSIVE • PREMIUM',
+                                    'Welcome to',
                                     style: GoogleFonts.montserrat(
-                                      fontSize: 11,
                                       color: Colors.white70,
-                                      letterSpacing: 2,
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
                                   Text(
-                                    'Discover premium collections',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 14,
+                                    'LUXURY COLLECTION',
+                                    style: GoogleFonts.playfairDisplay(
                                       color: const Color(0xFFFFD700),
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.2,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Discover premium products crafted for the discerning few',
+                          style: GoogleFonts.montserrat(
+                            color: Colors.white60,
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
                         ),
                       ],
                     ),
@@ -314,124 +354,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-          
           if (_isLoading)
-            SliverFillRemaining(
+            const SliverFillRemaining(
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFFFFD700).withOpacity(0.1),
-                      ),
-                      child: const CircularProgressIndicator(
-                        color: Color(0xFFFFD700),
-                        strokeWidth: 3,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Loading premium products...',
-                      style: GoogleFonts.montserrat(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
+                child: CircularProgressIndicator(
+                  color: Color(0xFFFFD700),
                 ),
               ),
             )
           else if (_error.isNotEmpty)
             SliverFillRemaining(
               child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.red.withOpacity(0.1),
-                        ),
-                        child: const Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: Colors.red,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Failed to load products',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        _error.length > 100 ? '${_error.substring(0, 100)}...' : _error,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          color: Colors.white70,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 32),
-                      ElevatedButton.icon(
-                        onPressed: _loadProducts,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFD700),
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-          else if (_products.isEmpty)
-            SliverFillRemaining(
-              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFFFFD700).withOpacity(0.1),
-                      ),
-                      child: const Icon(
-                        Icons.shopping_bag_outlined,
-                        size: 48,
-                        color: Color(0xFFFFD700),
-                      ),
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red.withOpacity(0.7),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     Text(
-                      'No products available',
+                      'Something went wrong',
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 20,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
-                      'Check back soon for new arrivals',
+                      _error,
                       style: GoogleFonts.montserrat(
-                        fontSize: 14,
                         color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _loadProducts,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFD700),
+                        foregroundColor: Colors.black,
+                      ),
+                      child: Text(
+                        'Try Again',
+                        style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -444,22 +413,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
+                  childAspectRatio: 0.8,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 0.75,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final product = _products[index];
-                    return AnimatedBuilder(
-                      animation: _fabAnimation,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: _fabAnimation.value,
-                          child: ProductCard(product: product),
-                        );
-                      },
-                    );
+                    return ProductCard(product: _products[index]);
                   },
                   childCount: _products.length,
                 ),
@@ -470,87 +430,60 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildCurrentScreen() {
-    switch (_currentIndex) {
-      case 0:
-        return _buildHome();
-      case 1:
-        return VipProductsScreen(
-          onNavigateToHome: () {
-            setState(() {
-              _currentIndex = 0;
-            });
-          },
-        );
-      case 2:
-        return const SearchScreen();
-      case 3:
-        return const ProfileScreen();
-      default:
-        return _buildHome();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      _buildHome(),
+      const VipProductsScreen(),
+      const SearchScreen(),
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: _buildCurrentScreen(),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF1A1A1A), Color(0xFF000000)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: pages,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color(0xFF1A1A1A),
+        selectedItemColor: const Color(0xFFFFD700),
+        unselectedItemColor: Colors.white54,
+        selectedLabelStyle: GoogleFonts.montserrat(
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent,
-          selectedItemColor: const Color(0xFFFFD700),
-          unselectedItemColor: Colors.white54,
-          selectedLabelStyle: GoogleFonts.montserrat(
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
+        unselectedLabelStyle: GoogleFonts.montserrat(fontSize: 12),
+        elevation: 8,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined, size: 24),
+            activeIcon: Icon(Icons.home, size: 24),
+            label: 'Home',
           ),
-          unselectedLabelStyle: GoogleFonts.montserrat(fontSize: 12),
-          elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined, size: 24),
-              activeIcon: Icon(Icons.home, size: 24),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.diamond_outlined, size: 24),
-              activeIcon: Icon(Icons.diamond, size: 24),
-              label: 'VIP',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search_outlined, size: 24),
-              activeIcon: Icon(Icons.search, size: 24),
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outlined, size: 24),
-              activeIcon: Icon(Icons.person, size: 24),
-              label: 'Profile',
-            ),
-          ],
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.diamond_outlined, size: 24),
+            activeIcon: Icon(Icons.diamond, size: 24),
+            label: 'VIP',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search_outlined, size: 24),
+            activeIcon: Icon(Icons.search, size: 24),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outlined, size: 24),
+            activeIcon: Icon(Icons.person, size: 24),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }

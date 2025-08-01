@@ -99,7 +99,7 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Your cart total: \${_cartService.totalAmount.toStringAsFixed(2)}',
+                    'Your cart total: \$${_cartService.totalAmount.toStringAsFixed(2)}',
                     style: GoogleFonts.montserrat(
                       color: const Color(0xFFFFD700),
                       fontWeight: FontWeight.bold,
@@ -284,7 +284,7 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
                     child: const Icon(
                       Icons.image_not_supported,
                       color: Colors.white54,
-                      size: 24,
+                      size: 32,
                     ),
                   ),
                 ),
@@ -311,51 +311,6 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
                   
                   const SizedBox(height: 4),
                   
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFD700).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0xFFFFD700).withOpacity(0.3),
-                          ),
-                        ),
-                        child: Text(
-                          item.category,
-                          style: GoogleFonts.montserrat(
-                            fontSize: 10,
-                            color: const Color(0xFFFFD700),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      if (item.isVipExclusive) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'VIP',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
                   Text(
                     '\$${item.price.toStringAsFixed(2)} each',
                     style: GoogleFonts.montserrat(
@@ -364,38 +319,38 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
-              ),
-            ),
-            
-            // Quantity and Remove
-            Column(
-              children: [
-                // Quantity Controls
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Quantity Controls
+                  Row(
                     children: [
                       IconButton(
-                        onPressed: () => _cartService.updateQuantity(
-                          item.productId,
-                          item.quantity - 1,
-                        ),
+                        onPressed: item.quantity > 1 
+                            ? () => _cartService.updateQuantity(
+                                item.productId,
+                                item.quantity - 1,
+                              )
+                            : null,
                         icon: const Icon(Icons.remove, size: 16),
-                        color: Colors.white,
+                        color: item.quantity > 1 ? Colors.white : Colors.white38,
                         constraints: const BoxConstraints.tightFor(width: 32, height: 32),
                         padding: EdgeInsets.zero,
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFFFFD700).withOpacity(0.3),
+                          ),
+                        ),
                         child: Text(
                           item.quantity.toString(),
                           style: GoogleFonts.montserrat(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -413,30 +368,30 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                // Total Price
-                Text(
-                  '\$${item.totalPrice.toStringAsFixed(2)}',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                  
+                  const SizedBox(height: 8),
+                  
+                  // Total Price
+                  Text(
+                    '\$${item.totalPrice.toStringAsFixed(2)}',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                // Remove Button
-                IconButton(
-                  onPressed: () => _cartService.removeFromCart(item.productId),
-                  icon: const Icon(Icons.delete_outline),
-                  color: Colors.red.withOpacity(0.8),
-                  constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-                ),
-              ],
+                  
+                  const SizedBox(height: 8),
+                  
+                  // Remove Button
+                  IconButton(
+                    onPressed: () => _cartService.removeFromCart(item.productId),
+                    icon: const Icon(Icons.delete_outline),
+                    color: Colors.red.withOpacity(0.8),
+                    constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -470,9 +425,9 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
             ),
             child: Column(
               children: [
-                // Handle
+                // Handle Bar
                 Container(
-                  margin: const EdgeInsets.only(top: 8),
+                  margin: const EdgeInsets.only(top: 12),
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
@@ -482,19 +437,14 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
                 ),
                 
                 // Header
-                Padding(
+                Container(
                   padding: const EdgeInsets.all(20),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFFFFD700).withOpacity(0.2),
-                              const Color(0xFFFFD700).withOpacity(0.1),
-                            ],
-                          ),
+                          color: const Color(0xFFFFD700).withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -511,7 +461,7 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
                             Text(
                               'Shopping Cart',
                               style: GoogleFonts.playfairDisplay(
-                                fontSize: 24,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -581,115 +531,61 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
                                 ),
                               ),
                             ),
-                            child: SafeArea(
-                              child: Column(
-                                children: [
-                                  // Order Summary
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF1A1A1A),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: const Color(0xFFFFD700).withOpacity(0.2),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Total Amount',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
                                       ),
                                     ),
-                                    child: Column(
+                                    Text(
+                                      '\$${_cartService.totalAmount.toStringAsFixed(2)}',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFFFFD700),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: _showCheckoutDialog,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFFFD700),
+                                      foregroundColor: Colors.black,
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      elevation: 8,
+                                      shadowColor: const Color(0xFFFFD700).withOpacity(0.3),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Subtotal:',
-                                              style: GoogleFonts.montserrat(
-                                                color: Colors.white70,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            Text(
-                                              '\$${_cartService.totalAmount.toStringAsFixed(2)}',
-                                              style: GoogleFonts.montserrat(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Shipping:',
-                                              style: GoogleFonts.montserrat(
-                                                color: Colors.white70,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            Text(
-                                              'FREE',
-                                              style: GoogleFonts.montserrat(
-                                                color: const Color(0xFFFFD700),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const Divider(color: Colors.white24, height: 20),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Total:',
-                                              style: GoogleFonts.montserrat(
-                                                color: Colors.white,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              '\$${_cartService.totalAmount.toStringAsFixed(2)}',
-                                              style: GoogleFonts.montserrat(
-                                                color: const Color(0xFFFFD700),
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
+                                        const Icon(Icons.shopping_bag, size: 20),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Proceed to Checkout',
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  
-                                  const SizedBox(height: 16),
-                                  
-                                  // Checkout Button
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: _showCheckoutDialog,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFFFD700),
-                                        foregroundColor: Colors.black,
-                                        padding: const EdgeInsets.symmetric(vertical: 18),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'Proceed to Checkout',
-                                        style: GoogleFonts.montserrat(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
