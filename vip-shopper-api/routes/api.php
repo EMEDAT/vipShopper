@@ -41,6 +41,39 @@ Route::get('/debug-db', function() {
     }
 });
 
+Route::get('/setup-products', function() {
+    try {
+        // Run the ProductSeeder
+        Artisan::call('db:seed', [
+            '--class' => 'ProductSeeder',
+            '--force' => true
+        ]);
+        
+        // Get count of products created
+        $totalProducts = \App\Models\Product::count();
+        $vipProducts = \App\Models\Product::where('is_vip_exclusive', true)->count();
+        $regularProducts = \App\Models\Product::where('is_vip_exclusive', false)->count();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Products seeded successfully',
+            'products_created' => [
+                'total' => $totalProducts,
+                'vip_exclusive' => $vipProducts,
+                'regular' => $regularProducts
+            ],
+            'seeder_output' => Artisan::output()
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
+
 Route::get('/setup-database', function() {
     try {
         // Check if tables exist, if not create them
