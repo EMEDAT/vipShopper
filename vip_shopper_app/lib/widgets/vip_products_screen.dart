@@ -53,9 +53,9 @@ class _VipProductsScreenState extends State<VipProductsScreen>
             _vipProducts = result;
           } else if (result is Map<String, dynamic>) {
             // Handle Map response (new structure)
-            _vipProducts = (result['products'] as List<dynamic>?)
-                ?.cast<Product>() ?? <Product>[];
-            _userTier = result['vip_tier'] ?? 'bronze'; // COMPLETE THIS LINE
+          final products = result['products'] as List<dynamic>? ?? [];
+          _vipProducts = products.map((json) => Product.fromJson(json)).toList();
+          _userTier = result['vip_tier'] ?? 'bronze';
           } else {
             _vipProducts = <Product>[];
           }
