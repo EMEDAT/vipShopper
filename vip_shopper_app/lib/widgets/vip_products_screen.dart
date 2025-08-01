@@ -37,30 +37,30 @@ class _VipProductsScreenState extends State<VipProductsScreen>
   }
 
 
-  Future<void> _loadVipProducts() async {
-    try {
-      setState(() {
-        _isLoading = true;
-        _error = '';
-      });
+Future<void> _loadVipProducts() async {
+  try {
+    setState(() {
+      _isLoading = true;
+      _error = '';
+    });
 
-        final products = await ApiService.getVipProducts();
-        if (mounted) {
-        setState(() {
-            _vipProducts = (products['products'] as List<Product>? ?? []);
-            _isLoading = false;
-        });
-        _slideController.forward();
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _isLoading = false;
-        });
-      }
+    final products = await ApiService.getVipProducts();
+    if (mounted) {
+      setState(() {
+        _vipProducts = products; // FIXED: Direct assignment since getVipProducts() returns List<Product>
+        _isLoading = false;
+      });
+      _slideController.forward();
+    }
+  } catch (e) {
+    if (mounted) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
     }
   }
+}
 
   bool get _hasVipAccess => ['gold', 'platinum'].contains(_userTier);
 
