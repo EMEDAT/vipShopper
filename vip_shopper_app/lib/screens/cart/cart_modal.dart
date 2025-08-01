@@ -79,7 +79,7 @@ class _CartModalState extends State<CartModal> with TickerProviderStateMixin {
               child: Column(
                 children: [
                   Text(
-                    'Hey Fernando, it\'s just a test app! 😂',
+                    'Chill bro, it\'s just a test app! 😂',
                     style: GoogleFonts.montserrat(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
