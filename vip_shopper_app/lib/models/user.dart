@@ -19,6 +19,7 @@ class User {
     required this.token,
   });
 
+  // Factory for login/register responses (includes token)
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['user']['id'],
@@ -30,6 +31,21 @@ class User {
           ? List<String>.from(json['user']['preferences'])
           : [],
       token: json['token'],
+    );
+  }
+
+  // Factory for direct API user responses (without token) - CRITICAL FIX
+  factory User.fromApiResponse(Map<String, dynamic> userData) {
+    return User(
+      id: userData['id'],
+      name: userData['name'],
+      email: userData['email'],
+      vipTier: userData['vip_tier'] ?? 'bronze',
+      totalSpent: double.parse(userData['total_spent']?.toString() ?? '0'),
+      preferences: userData['preferences'] != null 
+          ? List<String>.from(userData['preferences'])
+          : [],
+      token: '', // No token in user profile response
     );
   }
 

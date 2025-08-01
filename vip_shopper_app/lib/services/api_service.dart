@@ -5,28 +5,23 @@ import '../models/user.dart';
 import '../models/product.dart';
 
 class ApiService {
-  // CRITICAL: Use localhost to match Flutter web domain
   static const String baseUrl = 'http://localhost:8000/api';
   
-  // Get stored auth token
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('auth_token');
   }
   
-  // Store auth token
   static Future<void> storeToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('auth_token', token);
   }
   
-  // Clear auth token
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
   }
   
-  // Get headers with auth token
   static Future<Map<String, String>> getHeaders() async {
     final token = await getToken();
     return {
@@ -36,7 +31,6 @@ class ApiService {
     };
   }
 
-  // Register new user
   static Future<Map<String, dynamic>> register({
     required String name,
     required String email,
@@ -71,7 +65,6 @@ class ApiService {
     }
   }
 
-  // Login user
   static Future<Map<String, dynamic>> login({
     required String email,
     required String password,
@@ -106,7 +99,38 @@ class ApiService {
     }
   }
 
-  // Logout user
+  // CRITICAL FIX: This method was missing and causing the platinum UI bug
+  static Future<Map<String, dynamic>> getCurrentUser() async {
+    try {
+      print('👤 Getting current user: $baseUrl/user');
+      final response = await http.get(
+        Uri.parse('$baseUrl/user'),
+        headers: await getHeaders(),
+      );
+
+      print('📊 Get user status: ${response.statusCode}');
+      print('📦 Get user response: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'success': true,
+          'user': User.fromApiResponse(data['user']),
+          'vip_status': data['vip_status']
+        };
+      } else if (response.statusCode == 401) {
+        await clearToken();
+        return {'success': false, 'message': 'Authentication expired'};
+      } else {
+        final data = jsonDecode(response.body);
+        return {'success': false, 'message': data['message'] ?? 'Failed to get user'};
+      }
+    } catch (e) {
+      print('❌ Get user error: $e');
+      return {'success': false, 'message': 'Network error: $e'};
+    }
+  }
+
   static Future<bool> logout() async {
     try {
       final response = await http.post(
@@ -122,7 +146,6 @@ class ApiService {
     }
   }
 
-  // Get products
   static Future<List<Product>> getProducts() async {
     try {
       final response = await http.get(
@@ -142,7 +165,6 @@ class ApiService {
     }
   }
 
-  // Get VIP products
   static Future<List<Product>> getVipProducts() async {
     try {
       final response = await http.get(
@@ -162,7 +184,6 @@ class ApiService {
     }
   }
 
-  // AI Search
   static Future<Map<String, dynamic>> aiSearch(String query) async {
     try {
       final response = await http.post(
@@ -188,7 +209,6 @@ class ApiService {
     }
   }
 
-  // AI Recommendations (requires auth)
   static Future<Map<String, dynamic>> aiRecommendations() async {
     try {
       final response = await http.post(
@@ -213,7 +233,6 @@ class ApiService {
     }
   }
 
-  // AI Chat with concierge (requires auth)
   static Future<Map<String, dynamic>> aiChat(String message) async {
     try {
       print('🤖 AI Chat request: $message');
