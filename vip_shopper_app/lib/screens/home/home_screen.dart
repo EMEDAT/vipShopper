@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/api_service.dart';
+import '../../services/cart_service.dart';
 import '../../models/product.dart';
 import '../../widgets/product_card.dart';
 import '../auth/login_screen.dart';
 import 'search_screen.dart';
 import '../../widgets/vip_products_screen.dart';
 import 'profile_screen.dart';
+import '../cart/cart_modal.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String _error = '';
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
+  final CartService _cartService = CartService();
 
   @override
   void initState() {
@@ -70,6 +73,62 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         });
       }
     }
+  }
+
+  void _showCartModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const CartModal(),
+    );
+  }
+
+  Widget _buildCartIcon() {
+    return ListenableBuilder(
+      listenable: _cartService,
+      builder: (context, _) {
+        return Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart, color: Color(0xFFFFD700)),
+              onPressed: _showCartModal,
+            ),
+            if (_cartService.itemCount > 0)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.5),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 20,
+                    minHeight: 20,
+                  ),
+                  child: Text(
+                    _cartService.itemCount > 99 ? '99+' : _cartService.itemCount.toString(),
+                    style: GoogleFonts.montserrat(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _logout() async {
@@ -171,6 +230,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   );
                 },
               ),
+              _buildCartIcon(),
               IconButton(
                 icon: const Icon(Icons.logout, color: Color(0xFFFFD700)),
                 onPressed: _logout,

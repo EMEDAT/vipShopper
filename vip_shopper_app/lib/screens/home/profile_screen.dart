@@ -91,17 +91,18 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 
+  // FIXED: Better platinum color and tier colors
   Color get _tierColor {
     switch (_currentUser?.vipTier) {
       case 'platinum':
-        return const Color(0xFFE5E4E2);
+        return const Color(0xFFD4E6F1); // Better platinum blue-silver
       case 'gold':
-        return const Color(0xFFFFD700);
+        return const Color(0xFFFFD700); // Gold
       case 'silver':
-        return const Color(0xFFC0C0C0);
+        return const Color(0xFFC0C0C0); // Silver
       case 'bronze':
       default:
-        return const Color(0xFFCD7F32);
+        return const Color(0xFFCD7F32); // Bronze
     }
   }
 
@@ -109,6 +110,52 @@ class _ProfileScreenState extends State<ProfileScreen>
     return (_vipStatus?['benefits'] as List<dynamic>?)
         ?.map((benefit) => benefit.toString())
         .toList() ?? ['Basic membership benefits'];
+  }
+
+  // FIXED: Dynamic stats based on user tier and spending
+  Map<String, String> get _userStats {
+    final totalSpent = _currentUser?.totalSpent ?? 0;
+    final tier = _currentUser?.vipTier ?? 'bronze';
+    
+    // Calculate realistic stats based on tier and spending
+    int orders;
+    String saved;
+    String points;
+    
+    switch (tier) {
+      case 'platinum':
+        orders = (totalSpent / 200).round(); // $200 avg per order
+        saved = '\$${(totalSpent * 0.20).round()}'; // 20% cashback
+        points = '${((totalSpent / 10) * 1.5).round()}K'; // 1.5x points
+        break;
+      case 'gold':
+        orders = (totalSpent / 150).round(); // $150 avg per order
+        saved = '\$${(totalSpent * 0.15).round()}'; // 15% cashback
+        points = '${((totalSpent / 10) * 1.2).round()}K'; // 1.2x points
+        break;
+      case 'silver':
+        orders = (totalSpent / 100).round(); // $100 avg per order
+        saved = '\$${(totalSpent * 0.10).round()}'; // 10% cashback
+        points = '${(totalSpent / 10).round()}K'; // Standard points
+        break;
+      case 'bronze':
+      default:
+        orders = (totalSpent / 75).round(); // $75 avg per order
+        saved = '\$${(totalSpent * 0.05).round()}'; // 5% cashback
+        points = '${(totalSpent / 15).round()}K'; // Lower points rate
+        break;
+    }
+    
+    // Ensure minimum realistic values
+    orders = orders < 1 ? 1 : orders;
+    if (saved == '\$0') saved = '\$0';
+    if (points == '0K') points = '0.1K';
+    
+    return {
+      'orders': orders.toString(),
+      'saved': saved,
+      'points': points,
+    };
   }
 
   Future<void> _sendAIMessage(String message) async {
@@ -164,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
         content: Text(
           'Are you sure you want to logout?',
-          style: GoogleFonts.montserrat(color: Colors.white),
+          style: GoogleFonts.montserrat(color: Colors.white70),
         ),
         actions: [
           TextButton(
@@ -174,79 +221,69 @@ class _ProfileScreenState extends State<ProfileScreen>
               style: GoogleFonts.montserrat(color: Colors.white70),
             ),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFD700),
-              foregroundColor: Colors.black,
-            ),
             child: Text(
               'Logout',
-              style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+              style: GoogleFonts.montserrat(color: const Color(0xFFFFD700)),
             ),
           ),
         ],
       ),
     );
 
-    if (confirmed == true && mounted) {
+    if (confirmed == true) {
       await ApiService.logout();
       if (mounted) {
-        Navigator.of(context).pushReplacement(
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
         );
       }
     }
   }
 
   Widget _buildStatCard(String title, String value, IconData icon) {
-    return AnimatedBuilder(
-      animation: _cardAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _cardAnimation.value,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  _tierColor.withOpacity(0.1),
-                  _tierColor.withOpacity(0.05),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: _tierColor.withOpacity(0.3),
-              ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            _tierColor.withOpacity(0.1),
+            _tierColor.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _tierColor.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: _tierColor, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: GoogleFonts.montserrat(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-            child: Column(
-              children: [
-                Icon(icon, color: _tierColor, size: 24),
-                const SizedBox(height: 8),
-                Text(
-                  value,
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: _tierColor,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12,
-                    color: Colors.white70,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+            textAlign: TextAlign.center,
           ),
-        );
-      },
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: GoogleFonts.montserrat(
+              fontSize: 12,
+              color: Colors.white70,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -300,6 +337,8 @@ class _ProfileScreenState extends State<ProfileScreen>
       );
     }
 
+    final stats = _userStats; // Get dynamic stats
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: CustomScrollView(
@@ -343,9 +382,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 80, left: 24, right: 24),
+                    // FIXED: Reduced top padding from 80 to 60 to lift content upward
+                    padding: const EdgeInsets.only(top: 60, left: 24, right: 24),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center, // FIX ALIGNMENT
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -372,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center, // FIX ALIGNMENT
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 _tierDisplayName,
@@ -527,18 +567,19 @@ class _ProfileScreenState extends State<ProfileScreen>
                 
                 const SizedBox(height: 24),
                 
+                // FIXED: Dynamic stats based on user tier and spending
                 Row(
                   children: [
                     Expanded(
-                      child: _buildStatCard('Orders', '127', Icons.shopping_bag),
+                      child: _buildStatCard('Orders', stats['orders']!, Icons.shopping_bag),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _buildStatCard('Saved', '\$3,750', Icons.savings),
+                      child: _buildStatCard('Saved', stats['saved']!, Icons.savings),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _buildStatCard('Points', '12.5K', Icons.star),
+                      child: _buildStatCard('Points', stats['points']!, Icons.star),
                     ),
                   ],
                 ),
@@ -577,33 +618,22 @@ class _ProfileScreenState extends State<ProfileScreen>
                                     shape: BoxShape.circle,
                                     color: _tierColor.withOpacity(0.2),
                                   ),
-                                  child: Icon(
-                                    Icons.workspace_premium,
-                                    color: _tierColor,
-                                    size: 20,
-                                  ),
+                                  child: Icon(Icons.star, color: _tierColor, size: 20),
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
-                                  '${_tierDisplayName} Benefits',
+                                  'Membership Benefits',
                                   style: GoogleFonts.playfairDisplay(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: _tierColor,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
-                            
-                            ..._currentBenefits.map((benefit) => _buildBenefitItem(
-                              benefit, 
-                              benefit.contains('cashback') ? Icons.account_balance_wallet :
-                              benefit.contains('shipping') ? Icons.local_shipping :
-                              benefit.contains('support') ? Icons.headset_mic :
-                              benefit.contains('products') ? Icons.diamond :
-                              Icons.star
-                            )).toList(),
+                            ..._currentBenefits.map((benefit) => 
+                              _buildBenefitItem(benefit, Icons.check_circle)),
                           ],
                         ),
                       ),
@@ -613,153 +643,137 @@ class _ProfileScreenState extends State<ProfileScreen>
                 
                 const SizedBox(height: 24),
                 
-                // AI Concierge section remains the same...
-                AnimatedBuilder(
-                  animation: _cardAnimation,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _cardAnimation.value.clamp(0.0, 1.0),
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFFFFD700).withOpacity(0.05),
-                              const Color(0xFFB8860B).withOpacity(0.02),
-                            ],
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFFFFD700).withOpacity(0.08),
+                        const Color(0xFFFFD700).withOpacity(0.03),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFFFD700).withOpacity(0.2),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFFFFD700).withOpacity(0.2),
+                            ),
+                            child: const Icon(Icons.smart_toy, color: Color(0xFFFFD700), size: 20),
                           ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xFFFFD700).withOpacity(0.2),
+                          const SizedBox(width: 12),
+                          Text(
+                            'AI Concierge',
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      if (_aiResponse.isNotEmpty) ...[
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1A1A1A),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFFFFD700).withOpacity(0.3),
+                            ),
+                          ),
+                          child: Text(
+                            _aiResponse,
+                            style: GoogleFonts.montserrat(
+                              color: Colors.white,
+                              fontSize: 14,
+                              height: 1.5,
+                            ),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color(0xFFFFD700).withOpacity(0.2),
-                                  ),
-                                  child: const Icon(
-                                    Icons.smart_toy,
-                                    color: Color(0xFFFFD700),
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  'AI Concierge',
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFFFFD700),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            
-                            if (_aiResponse.isNotEmpty) ...[
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFD700).withOpacity(0.1),
+                        const SizedBox(height: 16),
+                      ],
+                      
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _chatController,
+                              style: GoogleFonts.montserrat(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: 'Ask me anything...',
+                                hintStyle: GoogleFonts.montserrat(color: Colors.white54),
+                                filled: true,
+                                fillColor: const Color(0xFF1A1A1A),
+                                border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: const Color(0xFFFFD700).withOpacity(0.3),
+                                  ),
                                 ),
-                                child: Text(
-                                  _aiResponse,
-                                  style: GoogleFonts.montserrat(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    height: 1.5,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: const Color(0xFFFFD700).withOpacity(0.3),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFFFFD700),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                            ],
-                            
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: _chatController,
-                                    style: GoogleFonts.montserrat(color: Colors.white),
-                                    decoration: InputDecoration(
-                                      hintText: 'Ask your AI concierge anything...',
-                                      hintStyle: GoogleFonts.montserrat(
-                                        color: Colors.white54,
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white.withOpacity(0.05),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(
-                                          color: const Color(0xFFFFD700).withOpacity(0.3),
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(
-                                          color: const Color(0xFFFFD700).withOpacity(0.3),
-                                        ),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(
-                                          color: Color(0xFFFFD700),
-                                        ),
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 12),
-                                    ),
-                                    onSubmitted: _sendAIMessage,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: IconButton(
-                                    onPressed: _isLoadingAI 
-                                        ? null 
-                                        : () => _sendAIMessage(_chatController.text),
-                                    icon: _isLoadingAI
-                                        ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              color: Colors.black,
-                                              strokeWidth: 2,
-                                            ),
-                                          )
-                                        : const Icon(
-                                            Icons.send,
-                                            color: Colors.black,
-                                          ),
-                                  ),
-                                ),
-                              ],
+                              onSubmitted: _sendAIMessage,
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 12),
+                          Container(
+                            height: 48,
+                            width: 48,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: _isLoadingAI
+                                ? const Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  )
+                                : IconButton(
+                                    onPressed: () => _sendAIMessage(_chatController.text),
+                                    icon: const Icon(Icons.send, color: Colors.black),
+                                  ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
                 
-                const SizedBox(height: 32),
-                
+                const SizedBox(height: 100),
               ]),
             ),
           ),
