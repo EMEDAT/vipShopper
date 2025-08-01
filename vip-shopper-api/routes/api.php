@@ -79,13 +79,13 @@ Route::get('/fix-products', function() {
         // 1. Clear all existing products to remove duplicates
         \App\Models\Product::truncate();
         
-        // 2. Run the ProductSeeder to create fresh products
+        // 2. Run the updated ProductSeeder
         Artisan::call('db:seed', [
             '--class' => 'ProductSeeder',
             '--force' => true
         ]);
         
-        // 3. Get counts
+        // 3. Get detailed counts
         $totalProducts = \App\Models\Product::count();
         $vipProducts = \App\Models\Product::where('is_vip_exclusive', true)->count();
         $regularProducts = \App\Models\Product::where('is_vip_exclusive', false)->count();
@@ -95,26 +95,69 @@ Route::get('/fix-products', function() {
         $uniqueImages = $allImages->unique();
         $duplicateCount = $allImages->count() - $uniqueImages->count();
         
+        // 5. Check price ranges to ensure proper separation
+        $vipPriceRange = \App\Models\Product::where('is_vip_exclusive', true)
+            ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
+            ->first();
+            
+        $regularPriceRange = \App\Models\Product::where('is_vip_exclusive', false)
+            ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
+            ->first();
+        
+        // 6. Get sample products to verify
+        $vipSample = \App\Models\Product::where('is_vip_exclusive', true)
+            ->take(5)
+            ->get(['name', 'price', 'category']);
+            
+        $regularSample = \App\Models\Product::where('is_vip_exclusive', false)
+            ->take(5)
+            ->get(['name', 'price', 'category']);
+        
         return response()->json([
             'success' => true,
-            'message' => 'Products fixed! No more duplicates! 🎉',
-            'products_created' => [
-                'total' => $totalProducts,
+            'message' => '🎉 Products completely fixed! No duplicates, proper pricing!',
+            'summary' => [
+                'total_products' => $totalProducts,
                 'vip_exclusive' => $vipProducts,
-                'regular' => $regularProducts
+                'regular_affordable' => $regularProducts,
+                'target_vip' => 30,
+                'target_regular' => 12,
+                'vip_goal_met' => $vipProducts >= 30,
+                'regular_goal_met' => $regularProducts >= 12
             ],
-            'image_analysis' => [
+            'image_verification' => [
                 'total_images' => $allImages->count(),
                 'unique_images' => $uniqueImages->count(),
-                'duplicates_removed' => $duplicateCount,
-                'all_images_unique' => $duplicateCount === 0
+                'duplicates_found' => $duplicateCount,
+                'all_images_unique' => $duplicateCount === 0 ? '✅ Perfect!' : '❌ Still has duplicates'
             ],
-            'vip_products_sample' => \App\Models\Product::where('is_vip_exclusive', true)
-                ->take(5)
-                ->get(['name', 'price', 'category']),
-            'regular_products_sample' => \App\Models\Product::where('is_vip_exclusive', false)
-                ->take(5)
-                ->get(['name', 'price', 'category'])
+            'price_analysis' => [
+                'vip_price_range' => [
+                    'min' => '$' . number_format($vipPriceRange->min_price, 2),
+                    'max' => '$' . number_format($vipPriceRange->max_price, 2),
+                    'category' => 'Ultra-Luxury'
+                ],
+                'regular_price_range' => [
+                    'min' => '$' . number_format($regularPriceRange->min_price, 2),
+                    'max' => '$' . number_format($regularPriceRange->max_price, 2),
+                    'category' => 'Affordable Everyday'
+                ],
+                'proper_separation' => $regularPriceRange->max_price < 1000 ? '✅ Perfect separation!' : '⚠️ Check pricing'
+            ],
+            'product_samples' => [
+                'vip_luxury_examples' => $vipSample,
+                'regular_affordable_examples' => $regularSample
+            ],
+            'categories_breakdown' => [
+                'vip_categories' => \App\Models\Product::where('is_vip_exclusive', true)
+                    ->select('category')
+                    ->groupBy('category')
+                    ->pluck('category'),
+                'regular_categories' => \App\Models\Product::where('is_vip_exclusive', false)
+                    ->select('category')
+                    ->groupBy('category')
+                    ->pluck('category')
+            ]
         ]);
         
     } catch (\Exception $e) {
