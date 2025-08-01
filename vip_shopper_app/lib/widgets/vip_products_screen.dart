@@ -134,116 +134,122 @@ class _VipProductsScreenState extends State<VipProductsScreen> {
                 ),
               ),
             )
-          else if (!_hasAccess)
+            else if (!_hasAccess)
             SliverFillRemaining(
-              child: Padding(
+                child: SingleChildScrollView(  // ADD THIS
                 padding: const EdgeInsets.all(24),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                    const SizedBox(height: 60), // ADD SOME TOP SPACING
                     Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFFFD700).withOpacity(0.3),
-                          width: 2,
+                            color: const Color(0xFFFFD700).withOpacity(0.3),
+                            width: 2,
                         ),
-                      ),
-                      child: const Icon(
+                        ),
+                        child: const Icon(
                         Icons.lock_outlined,
                         size: 60,
                         color: Color(0xFFFFD700),
-                      ),
+                        ),
                     ),
                     
                     const SizedBox(height: 30),
                     
                     Text(
-                      'VIP Access Required',
-                      style: GoogleFonts.playfairDisplay(
+                        'VIP Access Required',
+                        style: GoogleFonts.playfairDisplay(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFFFFD700),
-                      ),
-                      textAlign: TextAlign.center,
+                        ),
+                        textAlign: TextAlign.center,
                     ),
                     
                     const SizedBox(height: 16),
                     
                     Text(
-                      'Upgrade to Gold or Platinum membership to access our exclusive collection of luxury products.',
-                      style: GoogleFonts.montserrat(
+                        'Upgrade to Gold or Platinum membership to access our exclusive collection of luxury products.',
+                        style: GoogleFonts.montserrat(
                         fontSize: 16,
                         color: Colors.white70,
                         height: 1.5,
-                      ),
-                      textAlign: TextAlign.center,
+                        ),
+                        textAlign: TextAlign.center,
                     ),
                     
                     const SizedBox(height: 30),
                     
-                    // Upgrade Benefits
+                    // Benefits Container - CONSTRAIN HEIGHT
                     Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
+                        constraints: const BoxConstraints(maxHeight: 300), // ADD THIS
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
+                            colors: [
                             const Color(0xFFFFD700).withOpacity(0.1),
                             const Color(0xFFB8860B).withOpacity(0.1),
-                          ],
+                            ],
                         ),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFFFFD700).withOpacity(0.3),
+                            color: const Color(0xFFFFD700).withOpacity(0.3),
                         ),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '👑 Gold Membership Benefits',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFFFFD700),
+                        ),
+                        child: SingleChildScrollView( // ADD THIS
+                        child: Column(
+                            children: [
+                            Text(
+                                '👑 Gold Membership Benefits',
+                                style: GoogleFonts.montserrat(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFFFFD700),
+                                ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          _buildBenefitRow('15% cashback on all purchases'),
-                          _buildBenefitRow('Access to VIP exclusive products'),
-                          _buildBenefitRow('Priority customer support'),
-                          _buildBenefitRow('Free shipping worldwide'),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Spend \$5,000 to unlock Gold status',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 14,
-                              color: Colors.white60,
-                              fontStyle: FontStyle.italic,
+                            const SizedBox(height: 16),
+                            _buildBenefitRow('15% cashback on all purchases'),
+                            _buildBenefitRow('Access to VIP exclusive products'),
+                            _buildBenefitRow('Priority customer support'),
+                            _buildBenefitRow('Free shipping worldwide'),
+                            const SizedBox(height: 16),
+                            Text(
+                                'Spend \$5,000 to unlock Gold status',
+                                style: GoogleFonts.montserrat(
+                                fontSize: 14,
+                                color: Colors.white60,
+                                fontStyle: FontStyle.italic,
+                                ),
                             ),
-                          ),
-                        ],
-                      ),
+                            ],
+                        ),
+                        ),
                     ),
                     
                     const SizedBox(height: 30),
                     
                     ElevatedButton(
-                      onPressed: () {
+                        onPressed: () {
                         widget.onNavigateToHome?.call(); 
-                      },
-                      child: Text(
+                        },
+                        child: Text(
                         'VIEW REGULAR COLLECTION',
                         style: GoogleFonts.montserrat(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
                         ),
-                      ),
+                        ),
                     ),
-                  ],
+                    
+                    const SizedBox(height: 60), // ADD BOTTOM SPACING
+                    ],
                 ),
-              ),
+                ),
             )
           else if (_vipProducts.isEmpty)
             SliverFillRemaining(
