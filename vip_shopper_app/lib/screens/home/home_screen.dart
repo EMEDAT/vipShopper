@@ -9,6 +9,7 @@ import 'search_screen.dart';
 import '../../widgets/vip_products_screen.dart';
 import 'profile_screen.dart';
 import '../cart/cart_modal.dart';
+import '../../utils/responsive_grid.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -231,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            expandedHeight: 220,
+            expandedHeight: ResponsiveGrid.getExpandedHeight(context),
             floating: false,
             pinned: true,
             elevation: 0,
@@ -288,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 80, left: 24, right: 24),
+                    padding: ResponsiveGrid.getHeaderPadding(context),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -415,11 +416,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 0.7,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: ResponsiveGrid.getCrossAxisCount(context),
+                    childAspectRatio: ResponsiveGrid.getChildAspectRatio(context),
+                    crossAxisSpacing: ResponsiveGrid.getSpacing(context),
+                    mainAxisSpacing: ResponsiveGrid.getSpacing(context),
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {

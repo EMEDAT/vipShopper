@@ -17,13 +17,14 @@ class ProductController extends Controller
         if ($user) {
             if (in_array($user->vip_tier, ['gold', 'platinum'])) {
                 $productLimit = 30; // VIP users get 30 products
-                // Show all products (regular + VIP)
+                // FIXED: VIP users should see ALL products (regular + VIP) in main feed
+                // This is correct behavior for the main products endpoint
             } else {
                 $productLimit = 15; // Bronze/Silver users get 15 products
                 $query->regular(); // Only non-VIP products
             }
         } else {
-            $query->regular();
+            $query->regular(); // Guests see only regular products
         }
 
         $products = $query->latest()->paginate($productLimit);
@@ -32,7 +33,52 @@ class ProductController extends Controller
             'message' => 'Products retrieved successfully! 🛍️',
             'products' => $products,
             'product_limit' => $productLimit,
-            'user_tier' => $user ? $user->vip_tier : 'guest'
+            'user_tier' => $user ? $user->vip_tier : 'guest',
+            'total_products' => $query->count()
+        ]);
+    }
+
+    public function vipProducts(Request $request)
+    {
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json([
+                'message' => '🔒 Please login to access VIP products',
+                'products' => [],
+                'access_level' => 'denied'
+            ], 401);
+        }
+        
+        if (!in_array($user->vip_tier, ['gold', 'platinum'])) {
+            // Regular users: Limited VIP preview (only first 5 products)
+            $vipProducts = Product::vipOnly()
+                ->latest()
+                ->paginate(5);
+
+            return response()->json([
+                'message' => "Limited VIP preview for {$user->name}! Upgrade for full access. 🔒",
+                'products' => $vipProducts,
+                'vip_tier' => $user->vip_tier,
+                'product_limit' => 5,
+                'access_level' => 'limited',
+                'total_vip_products' => Product::vipOnly()->count(),
+                'upgrade_benefits' => $this->getUpgradeBenefits($user->vip_tier)
+            ]);
+        }
+
+        // VIP users: ALL 30 VIP-exclusive products, NEVER regular products
+        $vipProducts = Product::vipOnly()
+            ->latest()
+            ->paginate(30);
+
+        return response()->json([
+            'message' => "Welcome to VIP exclusives, {$user->name}! ✨",
+            'products' => $vipProducts,
+            'vip_tier' => $user->vip_tier,
+            'product_limit' => 30,
+            'access_level' => 'full',
+            'exclusive_count' => Product::vipOnly()->count()
         ]);
     }
 
@@ -63,7 +109,8 @@ class ProductController extends Controller
                         'name' => $product->name,
                         'category' => $product->category,
                         'is_vip_exclusive' => true,
-                        'required_tier' => 'Gold or Platinum'
+                        'required_tier' => 'Gold or Platinum',
+                        'price_preview' => 'Premium pricing'
                     ],
                     'upgrade_benefits' => $this->getUpgradeBenefits($user->vip_tier)
                 ], 403);
@@ -77,38 +124,19 @@ class ProductController extends Controller
         ]);
     }
 
-    public function vipProducts(Request $request)
+    // NEW: Separate endpoint for regular products only
+    public function regularProducts(Request $request)
     {
-        $user = $request->user();
-        
-        if (!in_array($user->vip_tier, ['gold', 'platinum'])) {
-            // Regular users: Limited VIP preview
-            $vipProducts = Product::vipOnly()
-                ->latest()
-                ->paginate(15);
-
-            return response()->json([
-                'message' => "Limited VIP preview for {$user->name}! Upgrade for full access. 🔒",
-                'products' => $vipProducts,
-                'vip_tier' => $user->vip_tier,
-                'product_limit' => 15,
-                'access_level' => 'limited',
-                'upgrade_benefits' => $this->getUpgradeBenefits($user->vip_tier)
-            ]);
-        }
-
-        // VIP users: ONLY VIP-exclusive products, never regular products
-        $vipProducts = Product::vipOnly()
+        $products = Product::regular()
             ->latest()
-            ->paginate(30);
+            ->paginate(15);
 
         return response()->json([
-            'message' => "Welcome to VIP exclusives, {$user->name}! ✨",
-            'products' => $vipProducts,
-            'vip_tier' => $user->vip_tier,
-            'product_limit' => 30,
-            'access_level' => 'full',
-            'exclusive_count' => Product::vipOnly()->count()
+            'message' => 'Regular products retrieved! 🛍️',
+            'products' => $products,
+            'product_limit' => 15,
+            'access_level' => 'public',
+            'total_regular_products' => Product::regular()->count()
         ]);
     }
 

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/api_service.dart';
 import '../models/product.dart';
 import '../widgets/product_card.dart';
+import '../utils/responsive_grid.dart';
 
 class VipProductsScreen extends StatefulWidget {
   const VipProductsScreen({super.key});
@@ -153,7 +154,7 @@ class _VipProductsScreenState extends State<VipProductsScreen>
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverAppBar(
-              expandedHeight: 200,
+              expandedHeight: ResponsiveGrid.getExpandedHeight(context),
               floating: false,
               pinned: true,
               elevation: 0,
@@ -164,7 +165,7 @@ class _VipProductsScreenState extends State<VipProductsScreen>
                 style: GoogleFonts.playfairDisplay(
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFFFFD700),
-                  fontSize: 20,
+                  fontSize: ResponsiveGrid.getTitleFontSize(context),
                 ),
               ),
               centerTitle: false,
@@ -183,7 +184,7 @@ class _VipProductsScreenState extends State<VipProductsScreen>
                   ),
                   child: SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 80, left: 24, right: 24),
+                      padding: ResponsiveGrid.getHeaderPadding(context),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -370,12 +371,12 @@ class _VipProductsScreenState extends State<VipProductsScreen>
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.7,
-                  ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: ResponsiveGrid.getCrossAxisCount(context),
+                crossAxisSpacing: ResponsiveGrid.getSpacing(context),
+                mainAxisSpacing: ResponsiveGrid.getSpacing(context),
+                childAspectRatio: ResponsiveGrid.getChildAspectRatio(context),
+                ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final product = _vipProducts[index];

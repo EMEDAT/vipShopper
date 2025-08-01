@@ -10,8 +10,9 @@ use App\Http\Controllers\AIController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Public product browsing (non-VIP products only) 
-Route::get('/products', [ProductController::class, 'index']);
+// Public product browsing 
+Route::get('/products', [ProductController::class, 'index']); // Mixed products based on user tier
+Route::get('/products/regular', [ProductController::class, 'regularProducts']); // Only regular products
 // AI-powered search (public)
 Route::post('/ai/search', [AIController::class, 'search']);
 
@@ -21,7 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     
     // VIP product access - MUST BE BEFORE /products/{id}
-    Route::get('/products/vip', [ProductController::class, 'vipProducts']);
+    Route::get('/products/vip', [ProductController::class, 'vipProducts']); // ONLY VIP products
     
     // AI recommendations for logged-in users
     Route::post('/ai/recommendations', [AIController::class, 'recommendations']);

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../services/api_service.dart';
 import '../../models/product.dart';
 import '../../widgets/product_card.dart';
+import '../../utils/responsive_grid.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -359,11 +360,11 @@ class _SearchScreenState extends State<SearchScreen> {
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(12),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 0.7,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: ResponsiveGrid.getCrossAxisCount(context),
+            crossAxisSpacing: ResponsiveGrid.getSpacing(context),
+            mainAxisSpacing: ResponsiveGrid.getSpacing(context),
+            childAspectRatio: ResponsiveGrid.getChildAspectRatio(context),
             ),
             itemCount: _searchResults.length,
             itemBuilder: (context, index) {

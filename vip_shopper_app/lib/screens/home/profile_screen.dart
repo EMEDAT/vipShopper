@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../services/api_service.dart';
 import '../../models/user.dart';
 import '../auth/login_screen.dart';
+import '../../utils/responsive_grid.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -345,7 +346,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            expandedHeight: 220,
+            expandedHeight: ResponsiveGrid.getExpandedHeight(context),
             floating: false,
             pinned: true,
             elevation: 0,
@@ -356,8 +357,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               style: GoogleFonts.playfairDisplay(
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFFFFD700),
-                fontSize: 20,
-              ),
+                fontSize: ResponsiveGrid.getTitleFontSize(context),              ),
             ),
             centerTitle: false,
             actions: [
@@ -383,7 +383,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 child: SafeArea(
                   child: Padding(
                     // FIXED: Reduced top padding from 80 to 60 to lift content upward
-                    padding: const EdgeInsets.only(top: 60, left: 24, right: 24),
+                    padding: ResponsiveGrid.getHeaderPadding(context),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [

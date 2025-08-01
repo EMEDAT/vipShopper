@@ -10,7 +10,7 @@ class ProductSeeder extends Seeder
     public function run()
     {
         $products = [
-            // VIP EXCLUSIVE - ULTRA LUXURY (22 items)
+            // VIP EXCLUSIVE - ULTRA LUXURY (30 items) - For rich people only!
             [
                 'name' => 'Rolex Submariner Date',
                 'description' => 'Swiss luxury diving watch, 904L steel, ceramic bezel, COSC certified',
@@ -37,33 +37,9 @@ class ProductSeeder extends Seeder
             ],
             [
                 'name' => 'Patek Philippe Nautilus',
-                'description' => 'Steel sports watch, Genta design, perpetual calendar complication',
-                'price' => 87000.00,
+                'description' => 'Steel sports watch, integrated bracelet, Geneva seal certification',
+                'price' => 80000.00,
                 'category' => 'Luxury Watches',
-                'image_url' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => true
-            ],
-            [
-                'name' => 'Cartier Love Bracelet',
-                'description' => '18k yellow gold, screw motif, iconic oval shape, includes screwdriver',
-                'price' => 7250.00,
-                'category' => 'Fine Jewelry',
-                'image_url' => 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => true
-            ],
-            [
-                'name' => 'Louis Vuitton Capucines MM',
-                'description' => 'Epi leather, LV turn-lock closure, named after street where LV opened',
-                'price' => 5100.00,
-                'category' => 'Luxury Fashion',
-                'image_url' => 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => true
-            ],
-            [
-                'name' => 'McLaren 720S',
-                'description' => 'Carbon fiber monocoque, 710hp twin-turbo V8, active aerodynamics',
-                'price' => 299000.00,
-                'category' => 'Supercars',
                 'image_url' => 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=800&auto=format&fit=crop',
                 'is_vip_exclusive' => true
             ],
@@ -187,8 +163,96 @@ class ProductSeeder extends Seeder
                 'image_url' => 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=800&auto=format&fit=crop',
                 'is_vip_exclusive' => true
             ],
+            [
+                'name' => 'Cartier Panthère de Cartier',
+                'description' => 'Yellow gold case, diamond accents, iconic panther motif',
+                'price' => 24000.00,
+                'category' => 'Luxury Watches',
+                'image_url' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'Louis Vuitton Capucines MM',
+                'description' => 'Taurillon leather, LV closure, French leather craftsmanship',
+                'price' => 5200.00,
+                'category' => 'Luxury Fashion',
+                'image_url' => 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'McLaren 720S',
+                'description' => '4.0L twin-turbo V8, carbon fiber monocoque, British supercar excellence',
+                'price' => 299000.00,
+                'category' => 'Supercars',
+                'image_url' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'Vacheron Constantin Patrimony',
+                'description' => 'Manual winding, ultra-thin movement, Geneva hallmark',
+                'price' => 35000.00,
+                'category' => 'Luxury Watches',
+                'image_url' => 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'Goyard Saint-Louis PM',
+                'description' => 'Hand-painted chevron canvas, French luxury trunk maker heritage',
+                'price' => 1890.00,
+                'category' => 'Luxury Fashion',
+                'image_url' => 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'Bugatti Chiron Sport',
+                'description' => 'Quad-turbo W16, 1479hp, 300mph+ capability, ultimate hypercar',
+                'price' => 3000000.00,
+                'category' => 'Hypercars',
+                'image_url' => 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'Omega Speedmaster Professional',
+                'description' => 'Moonwatch heritage, manual winding, NASA flight-qualified',
+                'price' => 6350.00,
+                'category' => 'Luxury Watches',
+                'image_url' => 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'Dior Lady Dior',
+                'description' => 'Cannage quilting, Dior charms, Princess Diana heritage design',
+                'price' => 4400.00,
+                'category' => 'Luxury Fashion',
+                'image_url' => 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'Maserati MC20',
+                'description' => 'V6 Nettuno engine, Italian supercar, carbon fiber construction',
+                'price' => 216000.00,
+                'category' => 'Supercars',
+                'image_url' => 'https://images.unsplash.com/photo-1610768764270-790fbec18178?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'Jaeger-LeCoultre Reverso',
+                'description' => 'Art Deco design, reversible case, Swiss manufacture movement',
+                'price' => 18200.00,
+                'category' => 'Luxury Watches',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
+            [
+                'name' => 'Prada Re-Edition 2005',
+                'description' => 'Tessuto nylon, vintage-inspired, Italian minimalist design',
+                'price' => 1200.00,
+                'category' => 'Luxury Fashion',
+                'image_url' => 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => true
+            ],
 
-            // REGULAR CONSUMER PRODUCTS (28 items)
+            // REGULAR CONSUMER PRODUCTS (15 items) - For normal people
             [
                 'name' => 'MacBook Pro 16" M3 Max',
                 'description' => 'Apple Silicon M3 Max chip, 16GB RAM, 512GB SSD, Liquid Retina XDR',
@@ -230,142 +294,6 @@ class ProductSeeder extends Seeder
                 'is_vip_exclusive' => false
             ],
             [
-                'name' => 'Canon EOS R5',
-                'description' => '45MP full-frame mirrorless, 8K video, in-body stabilization',
-                'price' => 3899.00,
-                'category' => 'Cameras',
-                'image_url' => 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Samsung Galaxy S24 Ultra',
-                'description' => '200MP camera, S Pen, 1TB storage, Snapdragon 8 Gen 3',
-                'price' => 1299.00,
-                'category' => 'Smartphones',
-                'image_url' => 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Apple Watch Series 9',
-                'description' => 'S9 SiP, Always-On Retina display, health monitoring, GPS + Cellular',
-                'price' => 429.00,
-                'category' => 'Smartwatches',
-                'image_url' => 'https://images.unsplash.com/photo-1551816230-ef5deaed4a26?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Adidas Ultraboost 23',
-                'description' => 'BOOST midsole, Primeknit upper, continental rubber outsole',
-                'price' => 190.00,
-                'category' => 'Running Shoes',
-                'image_url' => 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Dyson V15 Detect',
-                'description' => 'Laser dust detection, 60min runtime, whole-machine HEPA filtration',
-                'price' => 749.00,
-                'category' => 'Home Appliances',
-                'image_url' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Levi\'s 501 Original Jeans',
-                'description' => 'Straight leg, button fly, 100% cotton denim, classic fit',
-                'price' => 98.00,
-                'category' => 'Clothing',
-                'image_url' => 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Bose QuietComfort 45',
-                'description' => 'Wireless noise canceling, 24hr battery, TriPort acoustic design',
-                'price' => 329.00,
-                'category' => 'Audio',
-                'image_url' => 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'KitchenAid Artisan Stand Mixer',
-                'description' => '5-quart bowl, 10 speeds, tilt-head design, dishwasher-safe',
-                'price' => 429.00,
-                'category' => 'Kitchen Appliances',
-                'image_url' => 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Ray-Ban Aviator Classic',
-                'description' => 'Gold-tone frame, green G-15 lenses, 100% UV protection',
-                'price' => 154.00,
-                'category' => 'Sunglasses',
-                'image_url' => 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Nintendo Switch OLED',
-                'description' => '7" OLED screen, enhanced audio, 64GB storage, portable gaming',
-                'price' => 349.00,
-                'category' => 'Gaming',
-                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Hydro Flask Water Bottle',
-                'description' => '32oz, double-wall vacuum insulation, 18/8 stainless steel',
-                'price' => 44.95,
-                'category' => 'Outdoor Gear',
-                'image_url' => 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Patagonia Houdini Jacket',
-                'description' => 'Lightweight windbreaker, DWR finish, packable design',
-                'price' => 129.00,
-                'category' => 'Outdoor Clothing',
-                'image_url' => 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5a?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Instant Pot Duo 7-in-1',
-                'description' => '8-quart capacity, pressure cooker, slow cooker, rice cooker',
-                'price' => 119.00,
-                'category' => 'Kitchen Appliances',
-                'image_url' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Allbirds Tree Runners',
-                'description' => 'Eucalyptus tree fiber, machine washable, carbon neutral shipping',
-                'price' => 98.00,
-                'category' => 'Sustainable Footwear',
-                'image_url' => 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Yeti Rambler Tumbler',
-                'description' => '20oz, double-wall vacuum insulation, MagSlider lid',
-                'price' => 35.00,
-                'category' => 'Drinkware',
-                'image_url' => 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5a?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'Fitbit Charge 6',
-                'description' => 'GPS fitness tracker, heart rate monitoring, 7-day battery',
-                'price' => 199.00,
-                'category' => 'Fitness Trackers',
-                'image_url' => 'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
-                'name' => 'iPad Air 5th Generation',
-                'description' => 'M1 chip, 10.9" Liquid Retina display, 256GB WiFi',
-                'price' => 749.00,
-                'category' => 'Tablets',
-                'image_url' => 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&auto=format&fit=crop',
-                'is_vip_exclusive' => false
-            ],
-            [
                 'name' => 'Chanel No. 5 Eau de Parfum',
                 'description' => '100ml bottle, iconic fragrance, aldehydic floral composition',
                 'price' => 185.00,
@@ -398,9 +326,9 @@ class ProductSeeder extends Seeder
                 'is_vip_exclusive' => false
             ],
             [
-                'name' => 'Casper Wave Hybrid Mattress',
-                'description' => 'Queen size, zoned support, cooling gel pods, 100-night trial',
-                'price' => 2095.00,
+                'name' => 'Purple Hybrid Premier Mattress',
+                'description' => 'Queen size, cooling gel grid, pressure relief, 100-night trial',
+                'price' => 1799.00,
                 'category' => 'Home & Sleep',
                 'image_url' => 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&auto=format&fit=crop',
                 'is_vip_exclusive' => false
@@ -410,7 +338,39 @@ class ProductSeeder extends Seeder
                 'description' => 'Size B, fully loaded, ergonomic office seating, 12-year warranty',
                 'price' => 1395.00,
                 'category' => 'Office Furniture',
-                'image_url' => 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&auto=format&fit=crop',
+                'image_url' => 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => false
+            ],
+            [
+                'name' => 'Samsung 65" QN90A Neo QLED',
+                'description' => '4K 120Hz, Quantum HDR 32X, Neo Quantum Processor, premium TV',
+                'price' => 1797.00,
+                'category' => 'Electronics',
+                'image_url' => 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => false
+            ],
+            [
+                'name' => 'Dyson V15 Detect',
+                'description' => 'Laser dust detection, 60min runtime, powerful cordless vacuum',
+                'price' => 749.00,
+                'category' => 'Home Appliances',
+                'image_url' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => false
+            ],
+            [
+                'name' => 'KitchenAid Artisan Stand Mixer',
+                'description' => '5-quart bowl, 10 speeds, tilt-head design, iconic kitchen appliance',
+                'price' => 379.00,
+                'category' => 'Kitchen Appliances',
+                'image_url' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&auto=format&fit=crop',
+                'is_vip_exclusive' => false
+            ],
+            [
+                'name' => 'Peloton Bike+',
+                'description' => 'Interactive fitness bike, rotating touchscreen, live classes',
+                'price' => 2495.00,
+                'category' => 'Fitness Equipment',
+                'image_url' => 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop',
                 'is_vip_exclusive' => false
             ]
         ];
