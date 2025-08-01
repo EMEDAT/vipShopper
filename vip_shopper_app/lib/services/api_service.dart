@@ -37,6 +37,7 @@ class ApiService {
     required String password,
   }) async {
     try {
+      print('🚀 Registration attempt: $baseUrl/register');
       final response = await http.post(
         Uri.parse('$baseUrl/register'),
         headers: await getHeaders(),
@@ -47,6 +48,9 @@ class ApiService {
         }),
       );
 
+      print('📊 Registration status: ${response.statusCode}');
+      print('📦 Registration response: ${response.body}');
+
       final data = jsonDecode(response.body);
       
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -56,6 +60,7 @@ class ApiService {
         return {'success': false, 'message': data['message'] ?? 'Registration failed'};
       }
     } catch (e) {
+      print('❌ Registration error: $e');
       return {'success': false, 'message': 'Network error: $e'};
     }
   }
@@ -65,6 +70,9 @@ class ApiService {
     required String password,
   }) async {
     try {
+      print('🔐 Login attempt: $baseUrl/login');
+      print('📧 Email: $email');
+      
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: await getHeaders(),
@@ -73,6 +81,9 @@ class ApiService {
           'password': password,
         }),
       );
+
+      print('📊 Login status: ${response.statusCode}');
+      print('📦 Login response: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -83,29 +94,29 @@ class ApiService {
         return {'success': false, 'message': data['message'] ?? 'Login failed'};
       }
     } catch (e) {
+      print('❌ Login error: $e');
       return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
+  // CRITICAL FIX: This method was missing and causing the platinum UI bug
   static Future<Map<String, dynamic>> getCurrentUser() async {
     try {
+      print('👤 Getting current user: $baseUrl/user');
       final response = await http.get(
         Uri.parse('$baseUrl/user'),
         headers: await getHeaders(),
       );
 
+      print('📊 Get user status: ${response.statusCode}');
+      print('📦 Get user response: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        // Return simplified user data for tier checking
         return {
           'success': true,
-          'id': data['user']['id'],
-          'name': data['user']['name'],
-          'email': data['user']['email'],
-          'vip_tier': data['user']['vip_tier'] ?? 'bronze',
-          'total_spent': double.parse(data['user']['total_spent']?.toString() ?? '0'),
-          'preferences': data['user']['preferences'] ?? [],
-          'vip_status': data['vip_status'] ?? {}
+          'user': User.fromApiResponse(data['user']),
+          'vip_status': data['vip_status']
         };
       } else if (response.statusCode == 401) {
         await clearToken();
@@ -115,6 +126,7 @@ class ApiService {
         return {'success': false, 'message': data['message'] ?? 'Failed to get user'};
       }
     } catch (e) {
+      print('❌ Get user error: $e');
       return {'success': false, 'message': 'Network error: $e'};
     }
   }
@@ -153,8 +165,7 @@ class ApiService {
     }
   }
 
-  // CRITICAL FIX: Return structured data instead of List<Product>
-  static Future<Map<String, dynamic>> getVipProducts() async {
+  static Future<List<Product>> getVipProducts() async {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/products/vip'),
@@ -163,46 +174,13 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final products = (data['products']['data'] as List?)
-            ?.map((json) => Product.fromJson(json))
-            .toList() ?? [];
-        
-        return {
-          'success': true,
-          'products': products,
-          'access_level': data['access_level'] ?? 'full',
-          'message': data['message'] ?? 'VIP products loaded',
-          'vip_tier': data['vip_tier'] ?? 'gold'
-        };
-      } else if (response.statusCode == 403 || response.statusCode == 401) {
-        // CRITICAL FIX: Return access denied data, NO fallback to getProducts()
-        final data = jsonDecode(response.body);
-        return {
-          'success': false,
-          'products': <Product>[], // Empty list - NO regular products!
-          'access_level': 'denied',
-          'message': data['message'] ?? 'VIP access required',
-          'vip_tier': data['vip_tier'] ?? 'bronze'
-        };
+        final products = data['products']['data'] as List;
+        return products.map((json) => Product.fromJson(json)).toList();
       } else {
-        final data = jsonDecode(response.body);
-        return {
-          'success': false,
-          'products': <Product>[],
-          'access_level': 'error',
-          'message': data['message'] ?? 'Failed to load VIP products',
-          'vip_tier': 'bronze'
-        };
+        throw Exception('Failed to load VIP products');
       }
     } catch (e) {
-      // CRITICAL FIX: No fallback to getProducts() on network error
-      return {
-        'success': false,
-        'products': <Product>[],
-        'access_level': 'error',
-        'message': 'Network error: $e',
-        'vip_tier': 'bronze'
-      };
+      throw Exception('Network error: $e');
     }
   }
 
@@ -220,130 +198,72 @@ class ApiService {
         return {
           'success': true,
           'products': products.map((json) => Product.fromJson(json)).toList(),
-          'message': data['message'] ?? 'Search completed',
-          'insights': data['ai_insights'] ?? {}
+          'insights': data['ai_insights'],
+          'message': data['message'],
         };
       } else {
-        final data = jsonDecode(response.body);
-        return {
-          'success': false,
-          'products': <Product>[],
-          'message': data['message'] ?? 'Search failed',
-          'insights': {}
-        };
+        return {'success': false, 'message': 'Search failed'};
       }
     } catch (e) {
-      return {
-        'success': false,
-        'products': <Product>[],
-        'message': 'Network error: $e',
-        'insights': {}
-      };
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
   static Future<Map<String, dynamic>> aiRecommendations() async {
     try {
-      final response = await http.get(
+      final response = await http.post(
         Uri.parse('$baseUrl/ai/recommendations'),
         headers: await getHeaders(),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final products = data['recommendations'] as List;
+        final products = data['products'] as List;
         return {
           'success': true,
           'products': products.map((json) => Product.fromJson(json)).toList(),
-          'message': data['message'] ?? 'Recommendations generated',
-          'reasoning': data['ai_reasoning'] ?? {}
+          'insights': data['ai_insights'],
+          'recommendations': data['recommendations'],
         };
       } else {
-        final data = jsonDecode(response.body);
-        return {
-          'success': false,
-          'products': <Product>[],
-          'message': data['message'] ?? 'Failed to get recommendations'
-        };
+        return {'success': false, 'message': 'Failed to get recommendations'};
       }
     } catch (e) {
-      return {
-        'success': false,
-        'products': <Product>[],
-        'message': 'Network error: $e'
-      };
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
   static Future<Map<String, dynamic>> aiChat(String message) async {
     try {
+      print('🤖 AI Chat request: $message');
       final response = await http.post(
         Uri.parse('$baseUrl/ai/chat'),
         headers: await getHeaders(),
         body: jsonEncode({'message': message}),
       );
 
+      print('📊 AI Chat status: ${response.statusCode}');
+      print('📦 AI Chat response: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return {
           'success': true,
-          'response': data['ai_response'] ?? 'No response',
-          'message': data['message'] ?? 'Chat completed'
+          'response': data['ai_response'],
+          'user_message': data['user_message'],
         };
       } else {
-        final data = jsonDecode(response.body);
         return {
           'success': false,
-          'response': '',
-          'message': data['message'] ?? 'Chat failed'
+          'response': 'AI concierge is temporarily unavailable.'
         };
       }
     } catch (e) {
+      print('❌ AI Chat error: $e');
       return {
         'success': false,
-        'response': '',
-        'message': 'Network error: $e'
+        'response': 'Unable to connect to AI concierge.'
       };
-    }
-  }
-
-  // Helper method to check user tier without full user object
-  static Future<String> getUserTier() async {
-    try {
-      final userInfo = await getCurrentUser();
-      return userInfo['success'] ? userInfo['vip_tier'] : 'bronze';
-    } catch (e) {
-      return 'bronze';
-    }
-  }
-
-  // Helper method to check VIP access
-  static Future<bool> hasVipAccess() async {
-    try {
-      final tier = await getUserTier();
-      return ['gold', 'platinum'].contains(tier);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  // Get product limit based on user tier
-  static Future<int> getProductLimit() async {
-    try {
-      final hasVip = await hasVipAccess();
-      return hasVip ? 30 : 15;
-    } catch (e) {
-      return 15;
-    }
-  }
-
-  // Get search result limit based on user tier
-  static Future<int> getSearchLimit() async {
-    try {
-      final hasVip = await hasVipAccess();
-      return hasVip ? 24 : 12;
-    } catch (e) {
-      return 12;
     }
   }
 }
