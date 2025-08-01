@@ -32,7 +32,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     _loadProducts();
     _initAnimations();
-    _loadUserInfo();
   }
 
   void _initAnimations() {
@@ -52,58 +51,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _loadUserInfo() async {
-    try {
-      final userInfo = await ApiService.getCurrentUser();
-      if (mounted) {
-        setState(() {
-          _userTier = userInfo['vip_tier'] ?? 'bronze';
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading user info: $e');
-    }
-  }
 
-  Future<void> _loadProducts() async {
+    Future<void> _loadProducts() async {
     try {
-      setState(() {
+        setState(() {
         _isLoading = true;
         _error = '';
-      });
-
-      final products = await ApiService.getProducts();
-      
-      // Apply tier-based product limits
-      final int productLimit = _getProductLimit();
-      final limitedProducts = products.take(productLimit).toList();
-      
-      if (mounted) {
-        setState(() {
-          _products = limitedProducts;
-          _isLoading = false;
         });
-      }
+
+        final products = await ApiService.getProducts();
+        
+        if (mounted) {
+        setState(() {
+            _products = products; // Backend handles limits now
+            _isLoading = false;
+        });
+        }
     } catch (e) {
-      if (mounted) {
+        if (mounted) {
         setState(() {
-          _error = e.toString();
-          _isLoading = false;
+            _error = e.toString();
+            _isLoading = false;
         });
-      }
+        }
     }
-  }
+    }
 
-  int _getProductLimit() {
-    // VIP users (gold/platinum) see 30 products, regular users see 15
-    return ['gold', 'platinum'].contains(_userTier) ? 30 : 15;
-  }
-
-  String _getTierDisplayText() {
-    final limit = _getProductLimit();
-    final tierText = ['gold', 'platinum'].contains(_userTier) ? 'VIP' : 'Regular';
-    return 'Showing $limit products for $tierText members';
-  }
 
   void _showCartModal() {
     debugPrint('Cart icon tapped - showing modal');
@@ -369,14 +342,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          _getTierDisplayText(),
-                          style: GoogleFonts.montserrat(
-                            color: const Color(0xFFFFD700),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         Text(
                           'Discover premium products crafted for the discerning few',

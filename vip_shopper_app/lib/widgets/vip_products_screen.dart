@@ -27,7 +27,6 @@ class _VipProductsScreenState extends State<VipProductsScreen>
       vsync: this,
     );
     _loadVipProducts();
-    _loadUserInfo();
   }
 
   @override
@@ -36,18 +35,6 @@ class _VipProductsScreenState extends State<VipProductsScreen>
     super.dispose();
   }
 
-  Future<void> _loadUserInfo() async {
-    try {
-      final userInfo = await ApiService.getCurrentUser();
-      if (mounted) {
-        setState(() {
-          _userTier = userInfo['vip_tier'] ?? 'bronze';
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading user info: $e');
-    }
-  }
 
   Future<void> _loadVipProducts() async {
     try {
@@ -56,16 +43,11 @@ class _VipProductsScreenState extends State<VipProductsScreen>
         _error = '';
       });
 
-      final products = await ApiService.getVipProducts();
-      
-      // VIP products: 30 for VIP users, 15 for regular
-      final int productLimit = _hasVipAccess ? 30 : 15;
-      final limitedProducts = products.take(productLimit).toList();
-      
-      if (mounted) {
+        final products = await ApiService.getVipProducts();
+        if (mounted) {
         setState(() {
-          _vipProducts = limitedProducts;
-          _isLoading = false;
+            _vipProducts = products;
+            _isLoading = false;
         });
         _slideController.forward();
       }
@@ -80,12 +62,6 @@ class _VipProductsScreenState extends State<VipProductsScreen>
   }
 
   bool get _hasVipAccess => ['gold', 'platinum'].contains(_userTier);
-
-  String _getTierDisplayText() {
-    final limit = _hasVipAccess ? 30 : 15;
-    final tierText = _hasVipAccess ? 'VIP' : 'Limited';
-    return 'Showing $limit VIP products for $tierText access';
-  }
 
   Widget _buildAccessDenied() {
     return Center(
@@ -279,14 +255,6 @@ class _VipProductsScreenState extends State<VipProductsScreen>
                             ],
                           ),
                           const SizedBox(height: 16),
-                          Text(
-                            _getTierDisplayText(),
-                            style: GoogleFonts.montserrat(
-                              color: const Color(0xFFFFD700),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                           const SizedBox(height: 8),
                           Text(
                             _hasVipAccess 
