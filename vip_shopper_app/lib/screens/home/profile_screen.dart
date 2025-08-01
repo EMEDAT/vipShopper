@@ -144,9 +144,9 @@ class _ProfileScreenState extends State<ProfileScreen>
         break;
     }
     
-    orders = orders < 1 ? 1 : orders;
+    orders = orders < 1 ? 0 : orders;
     if (saved == '\$0') saved = '\$0';
-    if (points == '0K') points = '0.1K';
+    if (points == '0K') points = '0.0K';
     
     return {
       'orders': orders.toString(),
