@@ -92,18 +92,17 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 
-  // FIXED: Better platinum color and tier colors
   Color get _tierColor {
     switch (_currentUser?.vipTier) {
       case 'platinum':
-        return const Color(0xFFD4E6F1); // Better platinum blue-silver
+        return const Color(0xFFD4E6F1);
       case 'gold':
-        return const Color(0xFFFFD700); // Gold
+        return const Color(0xFFFFD700);
       case 'silver':
-        return const Color(0xFFC0C0C0); // Silver
+        return const Color(0xFFC0C0C0);
       case 'bronze':
       default:
-        return const Color(0xFFCD7F32); // Bronze
+        return const Color(0xFFCD7F32);
     }
   }
 
@@ -113,41 +112,38 @@ class _ProfileScreenState extends State<ProfileScreen>
         .toList() ?? ['Basic membership benefits'];
   }
 
-  // FIXED: Dynamic stats based on user tier and spending
   Map<String, String> get _userStats {
     final totalSpent = _currentUser?.totalSpent ?? 0;
     final tier = _currentUser?.vipTier ?? 'bronze';
     
-    // Calculate realistic stats based on tier and spending
     int orders;
     String saved;
     String points;
     
     switch (tier) {
       case 'platinum':
-        orders = (totalSpent / 200).round(); // $200 avg per order
-        saved = '\$${(totalSpent * 0.20).round()}'; // 20% cashback
-        points = '${((totalSpent / 10) * 1.5).round()}K'; // 1.5x points
+        orders = (totalSpent / 200).round();
+        saved = '\$${(totalSpent * 0.20).round()}';
+        points = '${((totalSpent / 10) * 1.5).round()}K';
         break;
       case 'gold':
-        orders = (totalSpent / 150).round(); // $150 avg per order
-        saved = '\$${(totalSpent * 0.15).round()}'; // 15% cashback
-        points = '${((totalSpent / 10) * 1.2).round()}K'; // 1.2x points
+        orders = (totalSpent / 150).round();
+        saved = '\$${(totalSpent * 0.15).round()}';
+        points = '${((totalSpent / 10) * 1.2).round()}K';
         break;
       case 'silver':
-        orders = (totalSpent / 100).round(); // $100 avg per order
-        saved = '\$${(totalSpent * 0.10).round()}'; // 10% cashback
-        points = '${(totalSpent / 10).round()}K'; // Standard points
+        orders = (totalSpent / 100).round();
+        saved = '\$${(totalSpent * 0.10).round()}';
+        points = '${(totalSpent / 10).round()}K';
         break;
       case 'bronze':
       default:
-        orders = (totalSpent / 75).round(); // $75 avg per order
-        saved = '\$${(totalSpent * 0.05).round()}'; // 5% cashback
-        points = '${(totalSpent / 15).round()}K'; // Lower points rate
+        orders = (totalSpent / 75).round();
+        saved = '\$${(totalSpent * 0.05).round()}';
+        points = '${(totalSpent / 15).round()}K';
         break;
     }
     
-    // Ensure minimum realistic values
     orders = orders < 1 ? 1 : orders;
     if (saved == '\$0') saved = '\$0';
     if (points == '0K') points = '0.1K';
@@ -338,7 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       );
     }
 
-    final stats = _userStats; // Get dynamic stats
+    final stats = _userStats;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -357,7 +353,8 @@ class _ProfileScreenState extends State<ProfileScreen>
               style: GoogleFonts.playfairDisplay(
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFFFFD700),
-                fontSize: ResponsiveGrid.getTitleFontSize(context),              ),
+                fontSize: ResponsiveGrid.getTitleFontSize(context),
+              ),
             ),
             centerTitle: false,
             actions: [
@@ -381,61 +378,63 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
                 ),
                 child: SafeArea(
-                  child: Padding(
-                    // FIXED: Reduced top padding from 80 to 60 to lift content upward
-                    padding: ResponsiveGrid.getHeaderPadding(context),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: RadialGradient(
-                              colors: [_tierColor, _tierColor.withOpacity(0.7)],
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [_tierColor, _tierColor.withOpacity(0.7)],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _tierColor.withOpacity(0.4),
+                                  blurRadius: 20,
+                                  spreadRadius: 2,
+                                ),
+                              ],
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: _tierColor.withOpacity(0.4),
-                                blurRadius: 20,
-                                spreadRadius: 2,
-                              ),
-                            ],
+                            child: const Icon(
+                              Icons.person,
+                              size: 32,
+                              color: Colors.black,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.person,
-                            size: 32,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                _tierDisplayName,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 11,
-                                  color: Colors.white70,
-                                  letterSpacing: 2,
-                                  fontWeight: FontWeight.w500,
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _tierDisplayName,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 11,
+                                    color: Colors.white70,
+                                    letterSpacing: 2,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _tierSubtitle,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 14,
-                                  color: _tierColor,
-                                  fontWeight: FontWeight.w600,
+                                const SizedBox(height: 4),
+                                Text(
+                                  _tierSubtitle,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 14,
+                                    color: _tierColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -567,7 +566,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                 
                 const SizedBox(height: 24),
                 
-                // FIXED: Dynamic stats based on user tier and spending
                 Row(
                   children: [
                     Expanded(

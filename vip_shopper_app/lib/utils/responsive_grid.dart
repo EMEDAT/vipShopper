@@ -51,7 +51,7 @@ class ResponsiveGrid {
     } else if (screenWidth > 500) {
       return 180.0; // Medium screens
     } else {
-      return screenHeight < 700 ? 140.0 : 160.0; // Small screens
+      return screenHeight < 700 ? 100.0 : 120.0; // Small screens
     }
   }
   

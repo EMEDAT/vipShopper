@@ -275,88 +275,77 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const SizedBox(width: 8),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
+            background: Container(
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
+                gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF000000),
-                      Color(0xFF1A1A1A),
-                      Color(0xFF2A2A2A),
-                    ],
-                  ),
+                    colors: [Color(0xFF000000), Color(0xFF1A1A1A), Color(0xFF2A2A2A)],
+                ),
                 ),
                 child: SafeArea(
-                  child: Padding(
-                    padding: ResponsiveGrid.getHeaderPadding(context),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
+                child: LayoutBuilder(
+                    builder: (context, constraints) {
+                    // Calculate available space
+                    final availableHeight = constraints.maxHeight;
+                    final isSmallScreen = availableHeight < 180;
+                    
+                    return Padding(
+                        padding: EdgeInsets.only(
+                        top: availableHeight * 0.2, // Dynamic top based on available height
+                        left: 16,
+                        right: 16,
+                        bottom: 8,
+                        ),
+                        child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
                             Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
+                            padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
+                            decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 gradient: const RadialGradient(
-                                  colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+                                colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFFFFD700).withOpacity(0.4),
-                                    blurRadius: 20,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
+                            ),
+                            child: Icon(
                                 Icons.diamond,
+                                size: isSmallScreen ? 16 : 24,
                                 color: Colors.black,
-                                size: 24,
-                              ),
                             ),
-                            const SizedBox(width: 16),
+                            ),
+                            SizedBox(width: isSmallScreen ? 8 : 16),
                             Expanded(
-                              child: Column(
+                            child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    'Welcome to',
-                                    style: GoogleFonts.montserrat(
-                                      color: Colors.white70,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  Text(
-                                    'LUXURY COLLECTION',
-                                    style: GoogleFonts.playfairDisplay(
-                                      color: const Color(0xFFFFD700),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.2,
-                                    ),
-                                  ),
+                                Text(
+                                'Welcome To',
+                                style: GoogleFonts.montserrat(
+                                    color: Colors.white70,
+                                    fontSize: isSmallScreen ? 12 : 14,
+                                ),
+                                ),
+                                Text(
+                                'LUXURY COLLECTION',
+                                style: GoogleFonts.playfairDisplay(
+                                    color: const Color(0xFFFFD700),
+                                    fontSize: isSmallScreen ? 14 : 16,
+                                    fontWeight: FontWeight.bold,
+                                ),
+                                ),
                                 ],
-                              ),
                             ),
-                          ],
+                            ),
+                        ],
                         ),
-                        const SizedBox(height: 16),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Discover premium products crafted for the discerning few',
-                          style: GoogleFonts.montserrat(
-                            color: Colors.white60,
-                            fontSize: 14,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                    );
+                    },
                 ),
-              ),
+                ),
+            ),
             ),
           ),
           if (_isLoading)
