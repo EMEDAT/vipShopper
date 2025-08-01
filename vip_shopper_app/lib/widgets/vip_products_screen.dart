@@ -39,9 +39,10 @@ class _VipProductsScreenState extends State<VipProductsScreen>
   Future<void> _loadUserTier() async {
     try {
       final userInfo = await ApiService.getCurrentUser();
-      if (mounted) {
+      if (mounted && userInfo['success']) {
         setState(() {
-          _userTier = userInfo['vip_tier'] ?? 'bronze';
+          // Fix: Access tier from vip_status, not directly from userInfo
+          _userTier = userInfo['vip_status']['tier'] ?? 'bronze';
         });
       }
     } catch (e) {
