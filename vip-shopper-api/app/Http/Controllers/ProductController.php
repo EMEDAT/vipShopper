@@ -82,7 +82,7 @@ class ProductController extends Controller
         $user = $request->user();
         
         if (!in_array($user->vip_tier, ['gold', 'platinum'])) {
-            // Regular users: Show 15 VIP-only products as preview
+            // Regular users: Limited VIP preview
             $vipProducts = Product::vipOnly()
                 ->latest()
                 ->paginate(15);
@@ -97,37 +97,18 @@ class ProductController extends Controller
             ]);
         }
 
-        // VIP users: Show 30 products - VIP products first, then regular products
-        $vipProducts = Product::vipOnly()->latest()->get();
-        $regularProducts = Product::regular()->latest()->get();
-        
-        // Combine: VIP products first, then regular products, limit to 30 total
-        $allProducts = $vipProducts->concat($regularProducts)->take(30);
-        
-        // Convert to paginated response format
-        $paginatedProducts = new \Illuminate\Pagination\LengthAwarePaginator(
-            $allProducts,
-            $allProducts->count(),
-            30,
-            1,
-            ['path' => request()->url()]
-        );
+        // VIP users: ONLY VIP-exclusive products, never regular products
+        $vipProducts = Product::vipOnly()
+            ->latest()
+            ->paginate(30);
 
         return response()->json([
             'message' => "Welcome to VIP exclusives, {$user->name}! ✨",
-            'products' => [
-                'data' => $allProducts->values(),
-                'total' => $allProducts->count(),
-                'per_page' => 30,
-                'current_page' => 1
-            ],
+            'products' => $vipProducts,
             'vip_tier' => $user->vip_tier,
             'product_limit' => 30,
             'access_level' => 'full',
-            'composition' => [
-                'vip_exclusive' => $vipProducts->count(),
-                'regular' => min($regularProducts->count(), 30 - $vipProducts->count())
-            ]
+            'exclusive_count' => Product::vipOnly()->count()
         ]);
     }
 
