@@ -62,69 +62,67 @@ class _VipProductsScreenState extends State<VipProductsScreen> {
             pinned: true,
             backgroundColor: Colors.black,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(
+            title: Text(
                 'VIP EXCLUSIVES',
                 style: GoogleFonts.playfairDisplay(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFFFFD700),
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFFFD700),
                 ),
-              ),
-              background: Container(
+            ),
+            titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
+            centerTitle: false,
+            collapseMode: CollapseMode.pin,
+            background: Container(
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
+                gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF000000),
-                      Color(0xFF1A1A1A),
-                    ],
-                  ),
+                    colors: [Color(0xFF000000), Color(0xFF1A1A1A)],
                 ),
+                ),
+                child: Padding(
+                padding: const EdgeInsets.only(top: 100), // Push content below title
                 child: Center(
-                  child: Column(
+                    child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 40),
-                      Container(
+                        Container(
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const RadialGradient(
-                            colors: [
-                              Color(0xFFFFD700),
-                              Color(0xFFB8860B),
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFFFD700).withOpacity(0.5),
-                              blurRadius: 15,
-                              spreadRadius: 2,
+                            shape: BoxShape.circle,
+                            gradient: const RadialGradient(
+                            colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
                             ),
-                          ],
+                            boxShadow: [
+                            BoxShadow(
+                                color: const Color(0xFFFFD700).withOpacity(0.5),
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                            ),
+                            ],
                         ),
                         child: const Icon(
-                          Icons.diamond,
-                          size: 40,
-                          color: Colors.black,
+                            Icons.diamond,
+                            size: 40,
+                            color: Colors.black,
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
                         'FOR DISTINGUISHED MEMBERS ONLY',
                         style: GoogleFonts.montserrat(
-                          fontSize: 12,
-                          color: Colors.white70,
-                          letterSpacing: 2,
+                            fontSize: 12,
+                            color: Colors.white70,
+                            letterSpacing: 2,
                         ),
-                      ),
+                        ),
                     ],
-                  ),
+                    ),
                 ),
-              ),
+                ),
             ),
-          ),
+            ),
           
           if (_isLoading)
             const SliverFillRemaining(

@@ -96,47 +96,49 @@ class _HomeScreenState extends State<HomeScreen> {
             pinned: true,
             backgroundColor: Colors.black,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'VIP SHOPPER',
+            title: Text(
+                'VIP SHOPPER', // or 'PROFILE', 'VIP EXCLUSIVES'
                 style: GoogleFonts.playfairDisplay(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFFFFD700),
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFFFD700),
                 ),
-              ),
-              background: Container(
+            ),
+            titlePadding: const EdgeInsets.only(left: 16, top: 60), // TOP positioning
+            centerTitle: false,
+            collapseMode: CollapseMode.pin,
+            background: Container(
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
+                gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF000000),
-                      Color(0xFF1A1A1A),
-                    ],
-                  ),
+                    colors: [Color(0xFF000000), Color(0xFF1A1A1A)],
                 ),
+                ),
+                child: Padding(
+                padding: const EdgeInsets.only(top: 120), 
                 child: Center(
-                  child: Column(
+                    child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 40),
-                      Icon(
+                        Icon(
                         Icons.diamond,
                         size: 60,
                         color: const Color(0xFFFFD700).withOpacity(0.8),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
                         'LUXURY • EXCLUSIVE • PREMIUM',
                         style: GoogleFonts.montserrat(
-                          fontSize: 12,
-                          color: Colors.white70,
-                          letterSpacing: 2,
+                            fontSize: 12,
+                            color: Colors.white70,
+                            letterSpacing: 2,
                         ),
-                      ),
+                        ),
                     ],
-                  ),
+                    ),
                 ),
-              ),
+                ),
+            ),
             ),
             actions: [
               IconButton(

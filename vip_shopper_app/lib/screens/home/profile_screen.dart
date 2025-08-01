@@ -89,58 +89,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
             pinned: true,
             backgroundColor: Colors.black,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(
+            title: Text(
                 'PROFILE',
                 style: GoogleFonts.playfairDisplay(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFFFFD700),
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFFFD700),
                 ),
-              ),
-              background: Container(
+            ),
+            titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
+            centerTitle: false,
+            collapseMode: CollapseMode.pin,
+            background: Container(
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
+                gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF000000),
-                      Color(0xFF1A1A1A),
-                    ],
-                  ),
+                    colors: [Color(0xFF000000), Color(0xFF1A1A1A)],
                 ),
+                ),
+                child: Padding(
+                padding: const EdgeInsets.only(top: 100),
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 40),
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const RadialGradient(
-                            colors: [
-                              Color(0xFFFFD700),
-                              Color(0xFFB8860B),
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFFFD700).withOpacity(0.5),
-                              blurRadius: 15,
-                              spreadRadius: 2,
-                            ),
-                          ],
+                    child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const RadialGradient(
+                        colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
                         ),
-                        child: const Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.black,
+                        boxShadow: [
+                        BoxShadow(
+                            color: const Color(0xFFFFD700).withOpacity(0.5),
+                            blurRadius: 15,
+                            spreadRadius: 2,
                         ),
-                      ),
-                    ],
-                  ),
+                        ],
+                    ),
+                    child: const Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Colors.black,
+                    ),
+                    ),
                 ),
-              ),
+                ),
+            ),
             ),
             actions: [
               IconButton(
