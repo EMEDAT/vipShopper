@@ -380,7 +380,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                 child: SafeArea(
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        top: 40, // Push content down
+                      ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [

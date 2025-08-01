@@ -36,31 +36,59 @@ class _VipProductsScreenState extends State<VipProductsScreen>
     super.dispose();
   }
 
-
-Future<void> _loadVipProducts() async {
-  try {
-    setState(() {
-      _isLoading = true;
-      _error = '';
-    });
-
-    final products = await ApiService.getVipProducts();
-    if (mounted) {
-      setState(() {
-        _vipProducts = products; // FIXED: Direct assignment since getVipProducts() returns List<Product>
-        _isLoading = false;
-      });
-      _slideController.forward();
-    }
-  } catch (e) {
-    if (mounted) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+  Future<void> _loadUserTier() async {
+    try {
+      final userInfo = await ApiService.getCurrentUser();
+      if (mounted) {
+        setState(() {
+          _userTier = userInfo['vip_tier'] ?? 'bronze';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _userTier = 'bronze';
+        });
+      }
     }
   }
-}
+
+  Future<void> _loadVipProducts() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = '';
+      });
+
+      // Load user tier first
+      await _loadUserTier();
+
+      // Complete lockout for non-VIP users
+      if (!_hasVipAccess) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Only VIP users can load products
+      final products = await ApiService.getVipProducts();
+      if (mounted) {
+        setState(() {
+          _vipProducts = products;
+          _isLoading = false;
+        });
+        _slideController.forward();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   bool get _hasVipAccess => ['gold', 'platinum'].contains(_userTier);
 
@@ -111,7 +139,7 @@ Future<void> _loadVipProducts() async {
             ),
             const SizedBox(height: 24),
             Text(
-              'Limited VIP Access',
+              'VIP ACCESS REQUIRED',
               style: GoogleFonts.playfairDisplay(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -120,21 +148,12 @@ Future<void> _loadVipProducts() async {
             ),
             const SizedBox(height: 12),
             Text(
-              'Upgrade to Gold or Platinum\nfor full VIP product access',
+              'Upgrade to Gold or Platinum\nto access exclusive VIP products',
               textAlign: TextAlign.center,
               style: GoogleFonts.montserrat(
                 fontSize: 16,
                 color: Colors.white70,
                 height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Current Tier: ${_userTier.toUpperCase()}',
-              style: GoogleFonts.montserrat(
-                fontSize: 14,
-                color: const Color(0xFFFFD700),
-                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -184,7 +203,12 @@ Future<void> _loadVipProducts() async {
                   ),
                   child: SafeArea(
                     child: Padding(
-                      padding: ResponsiveGrid.getHeaderPadding(context),
+                      padding: EdgeInsets.only(
+                        left: ResponsiveGrid.getHeaderPadding(context).left,
+                        right: ResponsiveGrid.getHeaderPadding(context).right,
+                        top: ResponsiveGrid.getHeaderPadding(context).top + 10, // Push content down
+                        bottom: ResponsiveGrid.getHeaderPadding(context).bottom,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -201,9 +225,9 @@ Future<void> _loadVipProducts() async {
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFFFFD700).withOpacity(0.4),
+                                          color: const Color(0xFFFFD700).withOpacity(0.3),
                                           blurRadius: 20,
-                                          spreadRadius: 2,
+                                          spreadRadius: 5,
                                         ),
                                       ],
                                     ),
@@ -242,7 +266,7 @@ Future<void> _loadVipProducts() async {
                                       ),
                                     ),
                                     Text(
-                                      _hasVipAccess ? 'FULL VIP ACCESS' : 'LIMITED ACCESS',
+                                      _hasVipAccess ? 'FULL VIP ACCESS' : 'ACCESS LOCKED',
                                       style: GoogleFonts.playfairDisplay(
                                         color: const Color(0xFFFFD700),
                                         fontSize: 18,
@@ -255,18 +279,6 @@ Future<void> _loadVipProducts() async {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          const SizedBox(height: 8),
-                          Text(
-                            _hasVipAccess 
-                                ? 'Unlimited access to our most exclusive products'
-                                : 'Upgrade for unlimited VIP product access',
-                            style: GoogleFonts.montserrat(
-                              color: Colors.white60,
-                              fontSize: 14,
-                              height: 1.5,
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -274,7 +286,6 @@ Future<void> _loadVipProducts() async {
                 ),
               ),
             ),
-            
             if (_isLoading)
               const SliverFillRemaining(
                 child: Center(
@@ -296,7 +307,7 @@ Future<void> _loadVipProducts() async {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Something went wrong',
+                        'Error loading VIP products',
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 20,
                           color: Colors.white,
@@ -328,6 +339,10 @@ Future<void> _loadVipProducts() async {
                   ),
                 ),
               )
+            else if (!_hasVipAccess)
+              SliverFillRemaining(
+                child: _buildAccessDenied(),
+              )
             else if (_vipProducts.isEmpty)
               SliverFillRemaining(
                 child: Center(
@@ -335,7 +350,8 @@ Future<void> _loadVipProducts() async {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(20),
+                        width: 80,
+                        height: 80,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: const Color(0xFFFFD700).withOpacity(0.1),
@@ -371,38 +387,15 @@ Future<void> _loadVipProducts() async {
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: ResponsiveGrid.getCrossAxisCount(context),
-                crossAxisSpacing: ResponsiveGrid.getSpacing(context),
-                mainAxisSpacing: ResponsiveGrid.getSpacing(context),
-                childAspectRatio: ResponsiveGrid.getChildAspectRatio(context),
-                ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: ResponsiveGrid.getCrossAxisCount(context),
+                    childAspectRatio: ResponsiveGrid.getChildAspectRatio(context),
+                    crossAxisSpacing: ResponsiveGrid.getSpacing(context),
+                    mainAxisSpacing: ResponsiveGrid.getSpacing(context),
+                  ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final product = _vipProducts[index];
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                          begin: Offset(0, 0.3 + (index * 0.1)),
-                          end: Offset.zero,
-                        ).animate(CurvedAnimation(
-                          parent: _slideController,
-                          curve: Interval(
-                            (index * 0.1).clamp(0.0, 1.0),
-                            1.0,
-                            curve: Curves.easeOutCubic,
-                          ),
-                        )),
-                        child: FadeTransition(
-                          opacity: CurvedAnimation(
-                            parent: _slideController,
-                            curve: Interval(
-                              (index * 0.1).clamp(0.0, 1.0),
-                              1.0,
-                            ),
-                          ),
-                          child: ProductCard(product: product),
-                        ),
-                      );
+                      return ProductCard(product: _vipProducts[index]);
                     },
                     childCount: _vipProducts.length,
                   ),
